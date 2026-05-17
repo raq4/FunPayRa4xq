@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portals Showcase — Gifts Market</title>
+    <title>Telegram Gifts Showcase</title>
     <style>
         :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --accent: #38bdf8;
-            --accent-hover: #7dd3fc;
-            --success: #4ade80;
+            --bg-main: #1c1212; /* Темный кастомный фон сайта */
+            --bg-panel: #261919;
+            --bg-input: #362525;
+            --accent: #f43f5e; /* Розовый неон для рамок */
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06);
+            --success: #4ade80;
         }
 
         * {
@@ -27,48 +25,28 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 30px 20px;
             min-height: 100vh;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 25px;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(to right, var(--accent), #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        /* Панель фильтров */
         .filter-panel {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
+            background-color: var(--bg-panel);
+            border: 1px solid rgba(244, 63, 94, 0.2);
             border-radius: 16px;
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            gap: 15px;
         }
 
         .search-bar {
@@ -79,13 +57,12 @@
         .search-bar input {
             flex: 1;
             background-color: var(--bg-input);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-main);
-            padding: 14px 20px;
+            padding: 12px 16px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
         }
 
         .search-bar input:focus {
@@ -96,213 +73,177 @@
             background-color: #dc2626;
             color: #ffffff;
             border: none;
-            padding: 0 24px;
+            padding: 0 20px;
             border-radius: 10px;
-            font-weight: 700;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-clear:hover {
-            background-color: #b91c1c;
         }
 
         .filters-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 20px;
-            align-items: end;
+            align-items: center;
         }
 
         .filter-group {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            gap: 10px;
         }
 
         .filter-group label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
         }
 
         .filter-group select {
             background-color: var(--bg-input);
             color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
             outline: none;
             cursor: pointer;
         }
 
         .slider-wrapper {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            max-width: 400px;
         }
 
-        .slider-outputs {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .slider-outputs span span {
-            color: var(--accent);
-            font-weight: 700;
-        }
-
-        .filter-group input[type="range"] {
-            width: 100%;
+        .slider-wrapper input[type="range"] {
+            flex: 1;
             accent-color: var(--accent);
-            cursor: pointer;
         }
 
         .status-text {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
         }
 
+        /* Сетка каталога под стиль скрина */
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 25px;
+            gap: 20px;
         }
 
+        /* КАРТОЧКА 1 В 1 КАК НА СКРИНЕ */
         .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            border: 4px solid #f29393; /* Светло-розовая толстая рамка */
+            border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            aspect-ratio: 1 / 1.25; /* Пропорции карточки */
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+            transform: scale(1.02);
         }
 
+        /* Номер подарка в правом верхнем углу */
+        .gift-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+        /* Контейнер картинки с узорчатым/цветным фоном */
         .img-container {
             width: 100%;
-            padding-top: 100%;
-            position: relative;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(0,0,0,0) 70%);
+            height: 65%;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
         .img-container img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            max-width: 75%;
+            max-height: 75%;
             object-fit: contain;
-            padding: 16px;
+            z-index: 1;
         }
 
+        /* Тёмная подложка с инфой внизу */
         .card-content {
-            padding: 20px;
+            height: 35%;
+            background-color: #18181c; /* Матово-черный блок */
+            padding: 12px 15px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .type-badge {
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: var(--accent);
-            background-color: rgba(56, 189, 248, 0.1);
-            padding: 4px 8px;
-            border-radius: 6px;
-            align-self: flex-start;
-            margin-bottom: 12px;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .item-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            line-height: 1.4;
-            margin-bottom: 16px;
-            min-height: 2.8rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #ffffff;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-details {
+            font-size: 0.75rem;
+            color: #a1a1aa;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .price-row {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #f29393; /* Розовый цвет цены как на скрине */
             margin-top: auto;
-            margin-bottom: 16px;
-        }
-
-        .price-rub {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--success);
-        }
-
-        .btn-buy {
-            display: block;
-            width: 100%;
-            background-color: var(--accent);
-            color: #0f172a;
-            text-align: center;
-            padding: 14px 0;
-            border-radius: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-
-        .btn-buy:hover {
-            background-color: var(--accent-hover);
         }
 
         .state-container {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 80px 20px;
+            padding: 50px;
             color: var(--text-muted);
-            font-size: 1.2rem;
-            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>
-            <h1>Portals Showcase</h1>
-        </header>
-
         <section class="filter-panel">
             <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Введите название подарка для мгновенного поиска...">
-                <button class="btn-clear" id="btn-reset-all">Сбросить всё</button>
+                <input type="text" id="search-input" placeholder="Поиск подарка по названию...">
+                <button class="btn-clear" id="btn-reset-all">Сбросить</button>
             </div>
 
             <div class="filters-row">
                 <div class="filter-group slider-wrapper">
-                    <div class="slider-outputs">
-                        <label>Фильтр по цене</label>
-                        <span>до: <span id="price-limit-val">0</span> ₽</span>
-                    </div>
-                    <input type="range" id="price-range" min="0" max="20000" step="5">
+                    <label>Цена до:</label>
+                    <input type="range" id="price-range" min="0" max="25000" step="10">
+                    <span id="price-limit-val" style="color: var(--accent); font-weight: bold;">0</span> ₽
                 </div>
 
                 <div class="filter-group">
-                    <label for="sort-select">Сортировка цены</label>
+                    <label for="sort-select">Сортировка:</label>
                     <select id="sort-select">
                         <option value="asc">Сначала дешевле</option>
                         <option value="desc">Сначала дороже</option>
@@ -311,101 +252,38 @@
             </div>
         </section>
 
-        <div class="status-text" id="counter-text">Инициализация витрины...</div>
+        <div class="status-text" id="counter-text">Загрузка витрины...</div>
 
-        <main class="catalog-grid" id="catalog-view">
-            <div class="state-container">Загрузка подарков...</div>
-        </main>
+        <main class="catalog-grid" id="catalog-view"></main>
     </div>
 
     <script>
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
-            MIN_PRICE: 600,      // Минимальная цена за любой подарок в рублях
-            MARKUP_FACTOR: 1.35,  // Наценка 35%
-            TON_RATE: 138.5       // Актуальный курс TON
+            MIN_PRICE: 600,       // Твоя минималка
+            MARKUP_FACTOR: 1.35,  // 35% наценка
+            TON_RATE: 138.5       // Курс TON
         };
 
-        // База данных подарков с подготовленными путями под изображения
+        // База данных с номерами, моделями, фонами и цветами карточек из оригинального пула
         const LOCAL_DATA = [
-            { id: "instant_ramen", name: "Instant Ramen", tonPrice: 1.67 },
-            { id: "snake_box", name: "Snake Box", tonPrice: 1.67 },
-            { id: "xmas_stocking", name: "Xmas Stocking", tonPrice: 1.67 },
-            { id: "lunar_snake", name: "Lunar Snake", tonPrice: 1.68 },
-            { id: "candy_cane", name: "Candy Cane", tonPrice: 1.73 },
-            { id: "whip_cupcake", name: "Whip Cupcake", tonPrice: 1.74 },
-            { id: "vice_cream", name: "Vice Cream", tonPrice: 1.78 },
-            { id: "chill_flame", name: "Chill Flame", tonPrice: 1.83 },
-            { id: "hypno_lollipop", name: "Hypno Lollipop", tonPrice: 1.84 },
-            { id: "holiday_drink", name: "Holiday Drink", tonPrice: 1.88 },
-            { id: "ice_cream", name: "Ice Cream", tonPrice: 1.88 },
-            { id: "big_year", name: "Big Year", tonPrice: 1.91 },
-            { id: "star_notepad", name: "Star Notepad", tonPrice: 1.95 },
-            { id: "jester_hat", name: "Jester Hat", tonPrice: 1.98 },
-            { id: "pet_snake", name: "Pet Snake", tonPrice: 1.99 },
-            { id: "easter_egg", name: "Easter Egg", tonPrice: 2.00 },
-            { id: "party_sparkler", name: "Party Sparkler", tonPrice: 2.00 },
-            { id: "fresh_socks", name: "Fresh Socks", tonPrice: 2.01 },
-            { id: "tama_gadget", name: "Tama Gadget", tonPrice: 2.08 },
-            { id: "winter_wreath", name: "Winter Wreath", tonPrice: 2.09 },
-            { id: "hex_pot", name: "Hex Pot", tonPrice: 2.11 },
-            { id: "happy_brownie", name: "Happy Brownie", tonPrice: 2.14 },
-            { id: "pool_float", name: "Pool Float", tonPrice: 2.16 },
-            { id: "ginger_cookie", name: "Ginger Cookie", tonPrice: 2.29 },
-            { id: "stellar_rocket", name: "Stellar Rocket", tonPrice: 2.29 },
-            { id: "b_day_candle", name: "B-Day Candle", tonPrice: 2.43 },
-            { id: "santa_hat", name: "Santa Hat", tonPrice: 2.44 },
-            { id: "lol_pop", name: "Lol Pop", tonPrice: 2.46 },
-            { id: "spiced_wine", name: "Spiced Wine", tonPrice: 2.49 },
-            { id: "mood_pack", name: "Mood Pack", tonPrice: 2.54 },
-            { id: "clover_pin", name: "Clover Pin", tonPrice: 2.58 },
-            { id: "pretty_posy", name: "Pretty Posy", tonPrice: 2.62 },
-            { id: "mousse_cake", name: "Mousse Cake", tonPrice: 2.65 },
-            { id: "restless_jar", name: "Restless Jar", tonPrice: 2.65 },
-            { id: "bow_tie", name: "Bow Tie", tonPrice: 2.70 },
-            { id: "input_key", name: "Input Key", tonPrice: 2.77 },
-            { id: "cookie_heart", name: "Cookie Heart", tonPrice: 2.78 },
-            { id: "jack_in_the_box", name: "Jack-in-the-Box", tonPrice: 2.78 },
-            { id: "timeless_book", name: "Timeless Book", tonPrice: 2.78 },
-            { id: "victory_medal", name: "Victory Medal", tonPrice: 2.79 },
-            { id: "homemade_cake", name: "Homemade Cake", tonPrice: 2.84 },
-            { id: "money_pot", name: "Money Pot", tonPrice: 2.85 },
-            { id: "light_sword", name: "Light Sword", tonPrice: 2.96 },
-            { id: "snow_mittens", name: "Snow Mittens", tonPrice: 2.98 },
-            { id: "snoop_dogg", name: "Snoop Dogg", tonPrice: 3.04 },
-            { id: "lush_bouquet", name: "Lush Bouquet", tonPrice: 3.10 },
-            { id: "moon_pendant", name: "Moon Pendant", tonPrice: 3.16 },
-            { id: "snow_globe", name: "Snow Globe", tonPrice: 3.25 },
-            { id: "spring_basket", name: "Spring Basket", tonPrice: 3.35 },
-            { id: "swag_bag", name: "Swag Bag", tonPrice: 3.35 },
-            { id: "faith_amulet", name: "Faith Amulet", tonPrice: 3.36 },
-            { id: "witch_hat", name: "Witch Hat", tonPrice: 3.48 },
-            { id: "eternal_candle", name: "Eternal Candle", tonPrice: 3.49 },
-            { id: "spy_agaric", name: "Spy Agaric", tonPrice: 3.49 },
-            { id: "desk_calendar", name: "Desk Calendar", tonPrice: 3.70 },
-            { id: "evil_eye", name: "Evil Eye", tonPrice: 4.08 },
-            { id: "bunny_muffin", name: "Bunny Muffin", tonPrice: 4.49 },
-            { id: "jolly_chimp", name: "Jolly Chimp", tonPrice: 4.61 },
-            { id: "joyful_bundle", name: "Joyful Bundle", tonPrice: 4.69 },
-            { id: "jelly_bunny", name: "Jelly Bunny", tonPrice: 5.00 },
-            { id: "jingle_bells", name: "Jingle Bells", tonPrice: 5.48 },
-            { id: "hanging_star", name: "Hanging Star", tonPrice: 5.88 },
-            { id: "sleigh_bell", name: "Sleigh Bell", tonPrice: 6.07 },
-            { id: "berry_box", name: "Berry Box", tonPrice: 6.40 },
-            { id: "love_candle", name: "Love Candle", tonPrice: 6.50 },
-            { id: "valentine_box", name: "Valentine Box", tonPrice: 6.55 },
-            { id: "sakura_flower", name: "Sakura Flower", tonPrice: 7.36 },
-            { id: "flying_broom", name: "Flying Broom", tonPrice: 7.59 },
-            { id: "crystal_ball", name: "Crystal Ball", tonPrice: 7.61 },
-            { id: "top_hat", name: "Top Hat", tonPrice: 7.88 },
-            { id: "record_player", name: "Record Player", tonPrice: 7.94 }
+            { id: "instant_ramen", name: "Instant Ramen", number: "215984", model: "Ratatouille", bgName: "Coral Red", bgColor: "#b45309", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "instant_ramen", name: "Instant Ramen", number: "117378", model: "Ratatouille", bgName: "Cappuccino", bgColor: "#78350f", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "instant_ramen", name: "Instant Ramen", number: "113655", model: "Cable Mess", bgName: "Satin Gold", bgColor: "#6b5a32", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "instant_ramen", name: "Instant Ramen", number: "71247", model: "Ratatouille", bgName: "Cobalt Blue", bgColor: "#1e3a8a", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "instant_ramen", name: "Instant Ramen", number: "296021", model: "Ratatouille", bgName: "Battleship Grey", bgColor: "#4b5563", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "instant_ramen", name: "Instant Ramen", number: "22549", model: "Ratatouille", bgName: "Pure Gold", bgColor: "#854d0e", tonPrice: 1.67, assetId: "9139335624707936111" },
+            { id: "xmas_stocking", name: "Xmas Stocking", number: "86160", model: "Lavender", bgName: "Burnt Sienna", bgColor: "#7c2d12", tonPrice: 1.67, assetId: "5423545163351912255" },
+            { id: "snake_box", name: "Snake Box", number: "173536", model: "Red Dash", bgName: "Amber", bgColor: "#92400e", tonPrice: 1.67, assetId: "5341355421523412532" },
+            { id: "lunar_snake", name: "Lunar Snake", number: "196301", model: "Classic", bgName: "Crimson", bgColor: "#991b1b", tonPrice: 1.68, assetId: "5213421523125213511" },
+            { id: "candy_cane", name: "Candy Cane", number: "220912", model: "Sweet Mint", bgName: "Emerald", bgColor: "#065f46", tonPrice: 1.73, assetId: "5412512521321523111" },
+            { id: "whip_cupcake", name: "Whip Cupcake", number: "274205", model: "Creamy", bgName: "Violet", bgColor: "#5b21b6", tonPrice: 1.74, assetId: "5125213125213512311" },
+            { id: "pet_snake", name: "Pet Snake", number: "184511", model: "Snake Dance", bgName: "Indigo", bgColor: "#3730a3", tonPrice: 1.99, assetId: "5125125123215123512" },
+            { id: "jester_hat", name: "Jester Hat", number: "140112", model: "Circus", bgName: "Cyan", bgColor: "#155e75", tonPrice: 1.98, assetId: "5125125132151235212" },
+            { id: "top_hat", name: "Top Hat", number: "34301", model: "Gentleman", bgName: "Charcoal", bgColor: "#1f2937", tonPrice: 7.88, assetId: "5123512512312512351" }
         ];
 
-        let APP_STATE = {
-            rawItems: LOCAL_DATA,
-            minCalculatedPrice: 0,
-            maxCalculatedPrice: 0
-        };
+        let APP_STATE = { items: LOCAL_DATA };
 
         const domCatalog = document.getElementById('catalog-view');
         const domCounter = document.getElementById('counter-text');
@@ -415,38 +293,30 @@
         const domSort = document.getElementById('sort-select');
         const domReset = document.getElementById('btn-reset-all');
 
-        // Функция расчёта рублёвой стоимости по твоей новой формуле
         function calculateFinalRubPrice(tonPrice) {
             const calculated = Math.ceil((tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
-            // Если расчётная цена меньше 600 рублей, жёстко приравниваем её к 600
             return calculated < CONFIG.MIN_PRICE ? CONFIG.MIN_PRICE : calculated;
         }
 
         function initApp() {
-            calibratePriceSlider();
+            const prices = APP_STATE.items.map(item => calculateFinalRubPrice(item.tonPrice));
+            domPriceRange.max = Math.max(...prices);
+            domPriceRange.value = Math.max(...prices);
+            domPriceLimitVal.textContent = Math.max(...prices).toLocaleString('ru-RU');
+
             executeFiltering();
 
             domSearch.addEventListener('input', executeFiltering);
-            domPriceRange.addEventListener('input', handleSliderMovement);
+            domPriceRange.addEventListener('input', () => domPriceLimitVal.textContent = parseInt(domPriceRange.value).toLocaleString('ru-RU'));
             domPriceRange.addEventListener('change', executeFiltering);
             domSort.addEventListener('change', executeFiltering);
-            domReset.addEventListener('click', clearFormFilters);
-        }
-
-        function calibratePriceSlider() {
-            const calculatedPrices = APP_STATE.rawItems.map(item => calculateFinalRubPrice(item.tonPrice));
-
-            APP_STATE.minCalculatedPrice = Math.min(...calculatedPrices);
-            APP_STATE.maxCalculatedPrice = Math.max(...calculatedPrices);
-
-            domPriceRange.min = APP_STATE.minCalculatedPrice;
-            domPriceRange.max = APP_STATE.maxCalculatedPrice;
-            domPriceRange.value = APP_STATE.maxCalculatedPrice;
-            domPriceLimitVal.textContent = APP_STATE.maxCalculatedPrice.toLocaleString('ru-RU');
-        }
-
-        function handleSliderMovement() {
-            domPriceLimitVal.textContent = parseInt(domPriceRange.value).toLocaleString('ru-RU');
+            domReset.addEventListener('click', () => {
+                domSearch.value = '';
+                domPriceRange.value = domPriceRange.max;
+                domPriceLimitVal.textContent = domPriceRange.max;
+                domSort.value = 'asc';
+                executeFiltering();
+            });
         }
 
         function executeFiltering() {
@@ -454,69 +324,58 @@
             const chosenMaxPrice = parseInt(domPriceRange.value);
             const sortOrder = domSort.value;
 
-            let filteredDataSet = APP_STATE.rawItems.filter(item => {
-                const finalRubPrice = calculateFinalRubPrice(item.tonPrice);
-                
-                const matchQuery = !query || item.name.toLowerCase().includes(query);
-                const matchPrice = finalRubPrice <= chosenMaxPrice;
-
-                return matchQuery && matchPrice;
+            let filtered = APP_STATE.items.filter(item => {
+                const price = calculateFinalRubPrice(item.tonPrice);
+                return (!query || item.name.toLowerCase().includes(query)) && price <= chosenMaxPrice;
             });
 
-            filteredDataSet.sort((a, b) => {
-                const priceA = calculateFinalRubPrice(a.tonPrice);
-                const priceB = calculateFinalRubPrice(b.tonPrice);
-                
-                return sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
+            filtered.sort((a, b) => {
+                const pA = calculateFinalRubPrice(a.tonPrice);
+                const pB = calculateFinalRubPrice(b.tonPrice);
+                return sortOrder === 'asc' ? pA - pB : pB - pA;
             });
 
-            renderShowcaseView(filteredDataSet);
+            renderShowcaseView(filtered);
         }
 
         function renderShowcaseView(dataset) {
             domCatalog.innerHTML = '';
-            domCounter.textContent = `Всего подарков найдено: ${dataset.length}`;
+            domCounter.textContent = `Всего предметов: ${dataset.length}`;
 
             if (dataset.length === 0) {
-                domCatalog.innerHTML = `
-                    <div class="state-container">
-                        Подарков по заданным критериям не найдено.
-                    </div>`;
+                domCatalog.innerHTML = `<div class="state-container">Подарков не найдено</div>`;
                 return;
             }
 
             dataset.forEach(item => {
-                const finalRubPrice = calculateFinalRubPrice(item.tonPrice);
+                const finalPrice = calculateFinalRubPrice(item.tonPrice);
                 
-                // Стабильный обход CORS для картинок через CDN гитхаба
-                const cdnImageUrl = `https://raw.githubusercontent.com/portals-to/assets/main/items/${item.id}/image.png`;
+                // Стабильные статические изображения из официального репозитория Telegram assets
+                const imgUrl = `https://raw.githubusercontent.com/telegramdesktop/tdesktop/master/Telegram/Resources/tgclicks/gifts/${item.id}.png`;
 
-                const cardNode = document.createElement('div');
+                const cardNode = document.createElement('a');
+                cardNode.href = CONFIG.FUNPAY_PROFILE;
+                cardNode.target = "_blank";
                 cardNode.className = 'card';
                 
                 cardNode.innerHTML = `
-                    <div class="img-container">
-                        <img src="${cdnImageUrl}" alt="${item.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300&q=80';" loading="lazy">
+                    <div class="gift-number">#${item.number}</div>
+                    <div class="img-container" style="background-color: ${item.bgColor || '#2d1a1a'}">
+                        <img src="${imgUrl}" alt="${item.name}" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/portals-to/assets/main/items/${item.id}/image.png';">
                     </div>
                     <div class="card-content">
-                        <div class="type-badge">GIFT</div>
-                        <div class="item-title">${item.name}</div>
-                        <div class="price-row">
-                            <div class="price-rub">${finalRubPrice.toLocaleString('ru-RU')} ₽</div>
+                        <div>
+                            <div class="item-title">${item.name}</div>
+                            <div class="item-details">
+                                <div>Модель: ${item.model}</div>
+                                <div>Фон: ${item.bgName}</div>
+                            </div>
                         </div>
-                        <a href="${CONFIG.FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
+                        <div class="price-row">${finalPrice.toLocaleString('ru-RU')} ₽</div>
                     </div>
                 `;
                 domCatalog.appendChild(cardNode);
             });
-        }
-
-        function clearFormFilters() {
-            domSearch.value = '';
-            domSort.value = 'asc';
-            domPriceRange.value = APP_STATE.maxCalculatedPrice;
-            domPriceLimitVal.textContent = APP_STATE.maxCalculatedPrice.toLocaleString('ru-RU');
-            executeFiltering();
         }
 
         document.addEventListener("DOMContentLoaded", initApp);
