@@ -156,7 +156,7 @@ body{
 <section class="panel">
     <div class="search-row">
         <input type="text" id="q" placeholder="Поиск по названию подарка…">
-        <button class="btn btn-reload" id="btn-reload">↺ Portals</button>
+        <button class="btn btn-reload" id="btn-reload">↺ Обновить</button>
         <button class="btn btn-reset" id="btn-reset">Сбросить</button>
     </div>
 
@@ -219,88 +219,15 @@ const CFG = {
     MIN_RUB:  600,
     MAX_TON:  8,
     TON_RATE: 138.5,
-    PROXY:    'https://corsproxy.io/?',
-    P_SEARCH: 'https://portals.tg/api/search',
-    P_ALT:    'https://portals.tg/api/nfts',
+    API_URLS: [
+        'https://portals.tg/api/search?sort=price_asc&limit=500',
+        'https://api.allorigins.win/raw?url=https://portals.tg/api/search?sort=price_asc&limit=500',
+        'https://corsproxy.io/?https://portals.tg/api/search?sort=price_asc&limit=500'
+    ]
 };
 
-/* ═══════════════  LOCAL DATA  ══════════════ */
-const LOCAL = [
-    {id:'instant-ramen',  name:'Instant Ramen',  num:'215984', model:'Ratatouille', backdrop:'Pure Gold',    symbol:'', bg:'#854d0e', ton:1.67},
-    {id:'snake-box',      name:'Snake Box',       num:'173536', model:'Red Dash',    backdrop:'Amber',        symbol:'', bg:'#92400e', ton:1.67},
-    {id:'xmas-stocking',  name:'Xmas Stocking',   num:'86160',  model:'Lavender',    backdrop:'Burnt Sienna', symbol:'', bg:'#7c2d12', ton:1.67},
-    {id:'lunar-snake',    name:'Lunar Snake',     num:'10943',  model:'Classic',     backdrop:'Crimson',      symbol:'', bg:'#991b1b', ton:1.68},
-    {id:'candy-cane',     name:'Candy Cane',      num:'44123',  model:'Sweet Mint',  backdrop:'Emerald',      symbol:'', bg:'#065f46', ton:1.73},
-    {id:'whip-cupcake',   name:'Whip Cupcake',    num:'98542',  model:'Creamy',      backdrop:'Violet',       symbol:'', bg:'#5b21b6', ton:1.74},
-    {id:'vice-cream',     name:'Vice Cream',      num:'12351',  model:'Soft Serve',  backdrop:'Mint',         symbol:'', bg:'#115e59', ton:1.78},
-    {id:'chill-flame',    name:'Chill Flame',     num:'65123',  model:'Neon',        backdrop:'Darkness',     symbol:'', bg:'#1e1b4b', ton:1.83},
-    {id:'hypno-lollipop', name:'Hypno Lollipop',  num:'74321',  model:'Spiral',      backdrop:'Psycho',       symbol:'', bg:'#4c1d95', ton:1.84},
-    {id:'holiday-drink',  name:'Holiday Drink',   num:'32154',  model:'Spiced',      backdrop:'Winter',       symbol:'', bg:'#831843', ton:1.88},
-    {id:'ice-cream',      name:'Ice Cream',       num:'15432',  model:'Vanilla',     backdrop:'Berry',        symbol:'', bg:'#9d174d', ton:1.88},
-    {id:'big-year',       name:'Big Year',        num:'88412',  model:'2025',        backdrop:'Confetti',     symbol:'', bg:'#14532d', ton:1.91},
-    {id:'star-notepad',   name:'Star Notepad',    num:'23154',  model:'Leather',     backdrop:'Cosmic',       symbol:'', bg:'#0f172a', ton:1.95},
-    {id:'jester-hat',     name:'Jester Hat',      num:'140112', model:'Circus',      backdrop:'Cyan',         symbol:'', bg:'#155e75', ton:1.98},
-    {id:'pet-snake',      name:'Pet Snake',       num:'184511', model:'Snake Dance', backdrop:'Indigo',       symbol:'', bg:'#3730a3', ton:1.99},
-    {id:'easter-egg',     name:'Easter Egg',      num:'54213',  model:'Painted',     backdrop:'Spring',       symbol:'', bg:'#166534', ton:2.00},
-    {id:'party-sparkler', name:'Party Sparkler',  num:'65412',  model:'Glow',        backdrop:'Midnight',     symbol:'', bg:'#030712', ton:2.00},
-    {id:'fresh-socks',    name:'Fresh Socks',     num:'43215',  model:'Striped',     backdrop:'Warmth',       symbol:'', bg:'#7c2d12', ton:2.01},
-    {id:'tama-gadget',    name:'Tama Gadget',     num:'87541',  model:'Retro',       backdrop:'Cyber',        symbol:'', bg:'#581c87', ton:2.08},
-    {id:'winter-wreath',  name:'Winter Wreath',   num:'19432',  model:'Pine',        backdrop:'Forest',       symbol:'', bg:'#064e3b', ton:2.09},
-    {id:'hex-pot',        name:'Hex Pot',         num:'99431',  model:'Brew',        backdrop:'Magic',        symbol:'', bg:'#4a044e', ton:2.11},
-    {id:'happy-brownie',  name:'Happy Brownie',   num:'76541',  model:'Choco',       backdrop:'Sweet',        symbol:'', bg:'#451a03', ton:2.14},
-    {id:'pool-float',     name:'Pool Float',      num:'23145',  model:'Flamingo',    backdrop:'Water',        symbol:'', bg:'#0369a1', ton:2.16},
-    {id:'ginger-cookie',  name:'Ginger Cookie',   num:'84321',  model:'Man',         backdrop:'Bakery',       symbol:'', bg:'#78350f', ton:2.29},
-    {id:'stellar-rocket', name:'Stellar Rocket',  num:'12543',  model:'Apollo',      backdrop:'Orbit',        symbol:'', bg:'#1e293b', ton:2.29},
-    {id:'b-day-candle',   name:'B-Day Candle',    num:'95412',  model:'Cake',        backdrop:'Party',        symbol:'', bg:'#1e1b4b', ton:2.43},
-    {id:'santa-hat',      name:'Santa Hat',       num:'43125',  model:'Claus',       backdrop:'Red',          symbol:'', bg:'#7f1d1d', ton:2.44},
-    {id:'lol-pop',        name:'Lol Pop',         num:'15423',  model:'Glaze',       backdrop:'Candy',        symbol:'', bg:'#701a75', ton:2.46},
-    {id:'spiced-wine',    name:'Spiced Wine',     num:'65432',  model:'Glint',       backdrop:'Cozy',         symbol:'', bg:'#4c0519', ton:2.49},
-    {id:'mood-pack',      name:'Mood Pack',       num:'32145',  model:'Emoji',       backdrop:'Yellow',       symbol:'', bg:'#713f12', ton:2.54},
-    {id:'clover-pin',     name:'Clover Pin',      num:'95431',  model:'Lucky',       backdrop:'Grass',        symbol:'', bg:'#064e3b', ton:2.58},
-    {id:'pretty-posy',    name:'Pretty Posy',     num:'12345',  model:'Flowers',     backdrop:'Garden',       symbol:'', bg:'#15803d', ton:2.62},
-    {id:'mousse-cake',    name:'Mousse Cake',     num:'74125',  model:'Glaze',       backdrop:'Desert',       symbol:'', bg:'#500724', ton:2.65},
-    {id:'restless-jar',   name:'Restless Jar',    num:'85214',  model:'Souls',       backdrop:'Eerie',        symbol:'', bg:'#311042', ton:2.65},
-    {id:'bow-tie',        name:'Bow Tie',         num:'96321',  model:'Classic',     backdrop:'Tuxedo',       symbol:'', bg:'#111827', ton:2.70},
-    {id:'input-key',      name:'Input Key',       num:'45213',  model:'Cyber',       backdrop:'Matrix',       symbol:'', bg:'#022c22', ton:2.77},
-    {id:'cookie-heart',   name:'Cookie Heart',    num:'85236',  model:'Love',        backdrop:'Pink',         symbol:'', bg:'#9d174d', ton:2.78},
-    {id:'jack-in-the-box',name:'Jack-in-the-Box', num:'36925',  model:'Surprise',    backdrop:'Toy',          symbol:'', bg:'#1e3a8a', ton:2.78},
-    {id:'timeless-book',  name:'Timeless Book',   num:'14785',  model:'Ancient',     backdrop:'Library',      symbol:'', bg:'#451a03', ton:2.78},
-    {id:'victory-medal',  name:'Victory Medal',   num:'25814',  model:'Gold',        backdrop:'Champ',        symbol:'', bg:'#854d0e', ton:2.79},
-    {id:'homemade-cake',  name:'Homemade Cake',   num:'36521',  model:'Sweet',       backdrop:'Kitchen',      symbol:'', bg:'#5c1d24', ton:2.84},
-    {id:'money-pot',      name:'Money Pot',       num:'98741',  model:'Gold',        backdrop:'Rich',         symbol:'', bg:'#713f12', ton:2.85},
-    {id:'light-sword',    name:'Light Sword',     num:'14523',  model:'Jedi',        backdrop:'Space',        symbol:'', bg:'#06283d', ton:2.96},
-    {id:'snow-mittens',   name:'Snow Mittens',    num:'32147',  model:'Fluffy',      backdrop:'Ice',          symbol:'', bg:'#104352', ton:2.98},
-    {id:'snoop-dogg',     name:'Snoop Dogg',      num:'42153',  model:'Legend',      backdrop:'WestCoast',    symbol:'', bg:'#1e1b4b', ton:3.04},
-    {id:'lush-bouquet',   name:'Lush Bouquet',    num:'75312',  model:'Luxury',      backdrop:'Rose',         symbol:'', bg:'#881337', ton:3.10},
-    {id:'moon-pendant',   name:'Moon Pendant',    num:'95135',  model:'Silver',      backdrop:'Night',        symbol:'', bg:'#0f172a', ton:3.16},
-    {id:'snow-globe',     name:'Snow Globe',      num:'85213',  model:'Magic',       backdrop:'Freeze',       symbol:'', bg:'#134e5e', ton:3.25},
-    {id:'spring-basket',  name:'Spring Basket',   num:'74123',  model:'Easter',      backdrop:'Green',        symbol:'', bg:'#14532d', ton:3.35},
-    {id:'swag-bag',       name:'Swag Bag',        num:'96385',  model:'Money',       backdrop:'Dollar',       symbol:'', bg:'#064e3b', ton:3.35},
-    {id:'faith-amulet',   name:'Faith Amulet',    num:'15935',  model:'Relic',       backdrop:'Glow',         symbol:'', bg:'#4a044e', ton:3.36},
-    {id:'witch-hat',      name:'Witch Hat',       num:'34301',  model:'Sorcerer',    backdrop:'Magic',        symbol:'', bg:'#2e1065', ton:3.48},
-    {id:'eternal-candle', name:'Eternal Candle',  num:'75395',  model:'Flame',       backdrop:'Gothic',       symbol:'', bg:'#450a0a', ton:3.49},
-    {id:'spy-agaric',     name:'Spy Agaric',      num:'12395',  model:'Mushroom',    backdrop:'Poison',       symbol:'', bg:'#6b21a8', ton:3.49},
-    {id:'desk-calendar',  name:'Desk Calendar',   num:'85274',  model:'Office',      backdrop:'Schedule',     symbol:'', bg:'#334155', ton:3.70},
-    {id:'evil-eye',       name:'Evil Eye',        num:'96314',  model:'Amulet',      backdrop:'Protect',      symbol:'', bg:'#172554', ton:4.08},
-    {id:'bunny-muffin',   name:'Bunny Muffin',    num:'75321',  model:'Sweet',       backdrop:'Bakery',       symbol:'', bg:'#4d0e3b', ton:4.49},
-    {id:'jolly-chimp',    name:'Jolly Chimp',     num:'14852',  model:'Toy',         backdrop:'Vintage',      symbol:'', bg:'#451a03', ton:4.61},
-    {id:'joyful-bundle',  name:'Joyful Bundle',   num:'96325',  model:'Gift Pack',   backdrop:'Bright',       symbol:'', bg:'#1e3a8a', ton:4.69},
-    {id:'jelly-bunny',    name:'Jelly Bunny',     num:'15948',  model:'Sweet',       backdrop:'Gelatin',      symbol:'', bg:'#065f46', ton:5.00},
-    {id:'jingle-bells',   name:'Jingle Bells',    num:'74159',  model:'Brass',       backdrop:'Xmas',         symbol:'', bg:'#7c2d12', ton:5.48},
-    {id:'hanging-star',   name:'Hanging Star',    num:'85296',  model:'Gold',        backdrop:'Shine',        symbol:'', bg:'#854d0e', ton:5.88},
-    {id:'sleigh-bell',    name:'Sleigh Bell',     num:'36952',  model:'Silver',      backdrop:'Chime',        symbol:'', bg:'#334155', ton:6.07},
-    {id:'berry-box',      name:'Berry Box',       num:'14725',  model:'Fresh',       backdrop:'Fruit',        symbol:'', bg:'#9d174d', ton:6.40},
-    {id:'love-candle',    name:'Love Candle',     num:'85231',  model:'Heart',       backdrop:'Aroma',        symbol:'', bg:'#881337', ton:6.50},
-    {id:'valentine-box',  name:'Valentine Box',   num:'96357',  model:'Gift',        backdrop:'Romantic',     symbol:'', bg:'#701a75', ton:6.55},
-    {id:'sakura-flower',  name:'Sakura Flower',   num:'14258',  model:'Bloom',       backdrop:'Japan',        symbol:'', bg:'#4d1234', ton:7.36},
-    {id:'flying-broom',   name:'Flying Broom',    num:'75369',  model:'Nimbus',      backdrop:'Witchcraft',   symbol:'', bg:'#2d1a4a', ton:7.59},
-    {id:'crystal-ball',   name:'Crystal Ball',    num:'85247',  model:'Oracle',      backdrop:'Future',       symbol:'', bg:'#1e1b4b', ton:7.61},
-    {id:'top-hat',        name:'Top Hat',         num:'34302',  model:'Gentleman',   backdrop:'Charcoal',     symbol:'', bg:'#1f2937', ton:7.88},
-    {id:'record-player',  name:'Record Player',   num:'96341',  model:'Vinyl',       backdrop:'Retro',        symbol:'', bg:'#3f2c12', ton:7.94},
-].filter(i => i.ton <= CFG.MAX_TON);
-
 /* ═══════════════  STATE  ══════════════ */
-let S = { items: LOCAL, isLive: false };
+let S = { items: [], isLive: false, allCollections: [], allModels: [], allBackdrops: [], allSymbols: [] };
 
 /* ═══════════════  DOM  ══════════════ */
 const el = {
@@ -332,38 +259,51 @@ const fmtTon = n => n.toFixed(2) + ' TON';
 /* ═══════════════  IMAGE  ══════════════ */
 function imgSrc(item) {
     if (item.photo_url) return item.photo_url;
-    const slug = item.id.replace(/-/g,'');
-    return item.num
-        ? `https://nft.fragment.com/gift/${slug}-${item.num}.large.jpg`
-        : `https://nft.fragment.com/gift/${slug}.large.jpg`;
+    if (item.image_url) return item.image_url;
+    if (item.tg_id) {
+        const slug = (item.name || 'gift').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        return `https://nft.fragment.com/gift/${slug}-${item.tg_id}.large.jpg`;
+    }
+    return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect fill="%23222" width="1" height="1"/></svg>';
 }
-function fallback(img, id) {
-    const slug = id.replace(/-/g,'');
+
+function fallback(img, item) {
     img.onerror = null;
-    img.src = `https://nft.fragment.com/gift/${slug}.large.jpg`;
-    img.onerror = () => {
-        img.onerror = null;
+    if (item.tg_id && item.name) {
+        const slug = item.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        img.src = `https://nft.fragment.com/gift/${slug}.large.jpg`;
+        img.onerror = () => {
+            img.onerror = null;
+            img.style.opacity = '.15';
+            img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect fill="%23444" width="1" height="1"/></svg>';
+        };
+    } else {
         img.style.opacity = '.15';
-        img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect fill="%23222" width="1" height="1"/></svg>';
-    };
+        img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect fill="%23444" width="1" height="1"/></svg>';
+    }
 }
 
 /* ═══════════════  DROPDOWNS  ══════════════ */
-function uniq(arr) { return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru')); }
+function uniq(arr) { 
+    return [...new Set(arr.filter(v => v && v.trim()))].sort((a,b) => a.localeCompare(b,'ru')); 
+}
 
 function fillSel(sel, vals, allLabel) {
     const prev = sel.value;
     sel.innerHTML = `<option value="">${allLabel}</option>`;
-    vals.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; sel.appendChild(o); });
+    vals.forEach(v => { 
+        const o = document.createElement('option'); 
+        o.value = o.textContent = v; 
+        sel.appendChild(o); 
+    });
     if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
 }
 
 function rebuildDropdowns() {
-    const it = S.items;
-    fillSel(el.fColl,  uniq(it.map(i=>i.name)),     'Все коллекции');
-    fillSel(el.fModel, uniq(it.map(i=>i.model)),    'Все модели');
-    fillSel(el.fBack,  uniq(it.map(i=>i.backdrop)), 'Все фоны');
-    fillSel(el.fSym,   uniq(it.map(i=>i.symbol).filter(s=>s)), 'Все символы');
+    fillSel(el.fColl,  S.allCollections, 'Все коллекции');
+    fillSel(el.fModel, S.allModels,      'Все модели');
+    fillSel(el.fBack,  S.allBackdrops,   'Все фоны');
+    fillSel(el.fSym,   S.allSymbols,     'Все символы');
 }
 
 /* ═══════════════  CHIPS  ══════════════ */
@@ -373,6 +313,7 @@ const CHIP_DEFS = [
     {label:'Фон',       sel:()=>el.fBack},
     {label:'Символ',    sel:()=>el.fSym},
 ];
+
 function buildChips() {
     el.chips.innerHTML = '';
     CHIP_DEFS.forEach(d => {
@@ -388,29 +329,36 @@ function buildChips() {
 
 /* ═══════════════  APPLY  ══════════════ */
 function initSlider() {
-    const max = Math.max(...S.items.map(i=>rubPrice(i.ton)), CFG.MIN_RUB);
-    el.fPrice.max = max; el.fPrice.value = max;
+    const max = Math.max(...S.items.map(i=>rubPrice(i.ton)), CFG.MIN_RUB, 25000);
+    el.fPrice.max = max; 
+    el.fPrice.value = max;
     el.pval.textContent = max.toLocaleString('ru-RU');
 }
 
 function apply() {
     const q    = el.q.value.toLowerCase().trim();
-    const coll = el.fColl.value, model = el.fModel.value;
-    const back = el.fBack.value, sym   = el.fSym.value;
+    const coll = el.fColl.value;
+    const model = el.fModel.value;
+    const back = el.fBack.value;
+    const sym   = el.fSym.value;
     const maxP = parseInt(el.fPrice.value);
     const asc  = el.fSort.value === 'asc';
 
     let res = S.items.filter(i => {
-        if (i.ton > CFG.MAX_TON)             return false;
-        if (rubPrice(i.ton) > maxP)          return false;
-        if (q     && !i.name.toLowerCase().includes(q)) return false;
-        if (coll  && i.name     !== coll)    return false;
-        if (model && i.model    !== model)   return false;
-        if (back  && i.backdrop !== back)    return false;
-        if (sym   && i.symbol   !== sym)     return false;
+        if (i.ton > CFG.MAX_TON) return false;
+        if (rubPrice(i.ton) > maxP) return false;
+        if (q && !i.name.toLowerCase().includes(q)) return false;
+        if (coll && i.collection !== coll) return false;
+        if (model && i.model !== model) return false;
+        if (back && i.backdrop !== back) return false;
+        if (sym && i.symbol !== sym) return false;
         return true;
     });
-    res.sort((a,b) => { const d = rubPrice(a.ton)-rubPrice(b.ton); return asc?d:-d; });
+    
+    res.sort((a,b) => { 
+        const d = rubPrice(a.ton) - rubPrice(b.ton); 
+        return asc ? d : -d; 
+    });
 
     buildChips();
     render(res);
@@ -420,20 +368,27 @@ function apply() {
 function render(data) {
     el.grid.innerHTML = '';
     el.status.textContent = `Показано: ${data.length} подарков`;
+    
     if (!data.length) {
         el.grid.innerHTML = '<div class="empty">Ничего не найдено — попробуйте изменить фильтры</div>';
         return;
     }
+    
     const frag = document.createDocumentFragment();
     data.forEach(item => {
         const rub  = rubPrice(item.ton);
-        const href = item.isLive && item.portalUrl ? item.portalUrl : CFG.FUNPAY;
+        const href = item.portalUrl || CFG.FUNPAY;
+        
         const a = document.createElement('a');
-        a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.className = 'card';
+        a.href = href; 
+        a.target = '_blank'; 
+        a.rel = 'noopener noreferrer'; 
+        a.className = 'card';
+        
         a.innerHTML = `
-            ${item.isLive?'<div class="c-live">LIVE</div>':''}
-            <div class="c-num">#${item.num||'—'}</div>
-            <div class="c-img" style="background:${item.bg||'#1a1a2e'}">
+            ${item.isLive ? '<div class="c-live">LIVE</div>' : ''}
+            <div class="c-num">#${item.num || '—'}</div>
+            <div class="c-img" style="background:${item.bg || '#1a1a2e'}">
                 <img src="${imgSrc(item)}" alt="${item.name}" loading="lazy">
             </div>
             <div class="c-body">
@@ -441,7 +396,7 @@ function render(data) {
                     <div class="c-name">${item.name}</div>
                     <div class="c-meta">
                         модель · ${item.model}<br>
-                        фон · ${item.backdrop}${item.symbol?`<br>символ · ${item.symbol}`:''}
+                        фон · ${item.backdrop}${item.symbol ? `<br>символ · ${item.symbol}` : ''}
                     </div>
                 </div>
                 <div>
@@ -449,64 +404,127 @@ function render(data) {
                     <div class="c-ton">${fmtTon(item.ton)}</div>
                 </div>
             </div>`;
+        
         const img = a.querySelector('img');
         img.onload  = () => img.classList.add('ok');
-        img.onerror = () => fallback(img, item.id);
+        img.onerror = () => fallback(img, item);
+        
         frag.appendChild(a);
     });
+    
     el.grid.appendChild(frag);
 }
 
 /* ═══════════════  PORTALS FETCH  ══════════════ */
-function setLoading(v) { el.spin.style.display = v?'block':'none'; }
+function setLoading(v) { 
+    el.spin.style.display = v ? 'block' : 'none'; 
+}
 
 function normalizePortals(raw) {
-    return raw.map(item => {
+    const items = [];
+    const collections = new Set();
+    const models = new Set();
+    const backdrops = new Set();
+    const symbols = new Set();
+
+    raw.forEach(item => {
         const ton = parseFloat(item.price || item.ton_price || 0);
-        if (!ton || ton > CFG.MAX_TON) return null;
-        const attrs    = item.attributes || [];
-        const model    = attrs.find(a=>a.type==='model')   ?.value || 'Standard';
-        const backdrop = attrs.find(a=>a.type==='backdrop') ?.value || 'Default';
-        const symbol   = attrs.find(a=>a.type==='symbol')   ?.value || '';
-        const id = (item.name||'gift').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-        return {
-            id, name:item.name||'Unknown',
-            num:String(item.external_collection_number||item.tg_id||''),
-            model, backdrop, symbol,
-            bg: item.backdrop_color||null, ton,
-            photo_url: item.photo_url||null, isLive:true,
-            portalUrl: item.id?`https://portals.tg/nft/${item.id}`:null,
-        };
-    }).filter(Boolean);
+        if (!ton || ton > CFG.MAX_TON) return;
+
+        const attrs = item.attributes || [];
+        const model = attrs.find(a => a.type === 'model')?.value || 'Standard';
+        const backdrop = attrs.find(a => a.type === 'backdrop')?.value || 'Default';
+        const symbol = attrs.find(a => a.type === 'symbol')?.value || '';
+        
+        const name = item.name || 'Unknown';
+        const collection = item.collection_name || name;
+        
+        collections.add(collection);
+        models.add(model);
+        backdrops.add(backdrop);
+        if (symbol) symbols.add(symbol);
+
+        const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        
+        items.push({
+            id,
+            name,
+            collection,
+            num: String(item.external_collection_number || item.tg_id || ''),
+            model,
+            backdrop,
+            symbol,
+            bg: item.backdrop_color || null,
+            ton,
+            photo_url: item.photo_url || item.image_url || null,
+            tg_id: item.tg_id || null,
+            isLive: true,
+            portalUrl: item.id ? `https://portals.tg/nft/${item.id}` : null,
+        });
+    });
+
+    S.allCollections = uniq([...collections]);
+    S.allModels = uniq([...models]);
+    S.allBackdrops = uniq([...backdrops]);
+    S.allSymbols = uniq([...symbols]);
+
+    return items;
 }
 
 async function fetchPortals() {
     setLoading(true);
-    el.srcBadge.textContent='⏳ Portals…'; el.srcBadge.className='badge';
-    const urls = [
-        `${CFG.P_SEARCH}?sort=price_asc&limit=200&max_price=${CFG.MAX_TON}`,
-        `${CFG.PROXY}${encodeURIComponent(CFG.P_SEARCH+'?sort=price_asc&limit=200&max_price='+CFG.MAX_TON)}`,
-        `${CFG.PROXY}${encodeURIComponent(CFG.P_ALT+'?sort=price_asc&limit=200&max_price='+CFG.MAX_TON)}`,
-    ];
-    for (const url of urls) {
+    el.srcBadge.textContent = '⏳ Загрузка…';
+    el.srcBadge.className = 'badge';
+
+    for (const url of CFG.API_URLS) {
         try {
-            const r = await fetch(url,{signal:AbortSignal.timeout(7000)});
-            if(!r.ok) continue;
+            console.log('Пробую загрузить с:', url);
+            const r = await fetch(url, { 
+                signal: AbortSignal.timeout(10000),
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if (!r.ok) {
+                console.log('Ответ не OK:', r.status);
+                continue;
+            }
+            
             const data = await r.json();
-            const raw  = Array.isArray(data)?data:(data.items||data.gifts||data.results||[]);
-            if(!raw.length) continue;
-            S.items  = normalizePortals(raw);
+            console.log('Получены данные:', data);
+            
+            const raw = Array.isArray(data) 
+                ? data 
+                : (data.items || data.gifts || data.results || data.data || []);
+            
+            if (!raw.length) {
+                console.log('Пустой массив данных');
+                continue;
+            }
+
+            console.log('Найдено записей:', raw.length);
+            S.items = normalizePortals(raw);
             S.isLive = true;
-            el.srcBadge.textContent=`✅ Portals · ${S.items.length} лотов`;
-            el.srcBadge.className='badge live';
-            setLoading(false); return;
-        } catch(_){}
+            
+            el.srcBadge.textContent = `✅ Portals · ${S.items.length} лотов`;
+            el.srcBadge.className = 'badge live';
+            setLoading(false);
+            
+            console.log('Успешно загружено:', S.items.length, 'подарков');
+            return;
+            
+        } catch (err) {
+            console.error('Ошибка загрузки:', err);
+        }
     }
-    // fallback
-    S.items=LOCAL; S.isLive=false;
-    el.srcBadge.textContent='📦 локальные данные';
-    el.srcBadge.className='badge';
+
+    // Если все попытки провалились
+    S.items = [];
+    S.isLive = false;
+    el.srcBadge.textContent = '❌ Ошибка загрузки';
+    el.srcBadge.className = 'badge';
     setLoading(false);
+    
+    el.grid.innerHTML = '<div class="empty">Не удалось загрузить данные. Попробуйте обновить страницу.</div>';
 }
 
 /* ═══════════════  INIT  ══════════════ */
@@ -516,24 +534,31 @@ async function init() {
     initSlider();
     apply();
 
-    el.fPrice.addEventListener('input', ()=>{
-        el.pval.textContent=parseInt(el.fPrice.value).toLocaleString('ru-RU');
+    el.fPrice.addEventListener('input', () => {
+        el.pval.textContent = parseInt(el.fPrice.value).toLocaleString('ru-RU');
     });
+    
     el.fPrice.addEventListener('change', apply);
-    [el.q, el.fColl, el.fModel, el.fBack, el.fSym, el.fSort].forEach(e=>{
-        e.addEventListener('input',  apply);
+    
+    [el.q, el.fColl, el.fModel, el.fBack, el.fSym, el.fSort].forEach(e => {
+        e.addEventListener('input', apply);
         e.addEventListener('change', apply);
     });
 
-    el.reset.addEventListener('click', ()=>{
-        el.q.value=''; el.fColl.value=''; el.fModel.value='';
-        el.fBack.value=''; el.fSym.value=''; el.fSort.value='asc';
-        el.fPrice.value=el.fPrice.max;
-        el.pval.textContent=parseInt(el.fPrice.max).toLocaleString('ru-RU');
+    el.reset.addEventListener('click', () => {
+        el.q.value = '';
+        el.fColl.value = '';
+        el.fModel.value = '';
+        el.fBack.value = '';
+        el.fSym.value = '';
+        el.fSort.value = 'asc';
+        el.fPrice.value = el.fPrice.max;
+        el.pval.textContent = parseInt(el.fPrice.max).toLocaleString('ru-RU');
         apply();
     });
-    el.reload.addEventListener('click', async ()=>{
-        S.isLive=false;
+
+    el.reload.addEventListener('click', async () => {
+        S.isLive = false;
         await fetchPortals();
         rebuildDropdowns();
         initSlider();
