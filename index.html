@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portals Showcase — Авто-подключение</title>
+    <title>Portals Showcase — Bulletproof Edition</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -341,10 +341,10 @@
             </div>
         </section>
 
-        <div class="status-text" id="counter-text">Подключение к защищенным шлюзам Portals API...</div>
+        <div class="status-text" id="counter-text">Подключение к отказоустойчивым шлюзам данных...</div>
 
         <main class="catalog-grid" id="catalog-view">
-            <div class="state-container">Пробиваем CORS-защиту, ожидайте ответа...</div>
+            <div class="state-container">Обходим защиту CORS и парсим структуру токенов...</div>
         </main>
     </div>
 
@@ -352,9 +352,8 @@
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
             MARKUP_FACTOR: 1.35,
-            // Прямой шлюз через автоматический corsproxy.io без ограничений
-            API_PORTALS: "https://corsproxy.io/?https://api.portals.to/v1/collections?include=items",
-            API_COINGECKO: "https://corsproxy.io/?https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub"
+            TARGET_PORTALS: "https://api.portals.to/v1/collections?include=items",
+            TARGET_COINGECKO: "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub"
         };
 
         let APP_STATE = {
@@ -373,35 +372,57 @@
         const domPriceLimitVal = document.getElementById('price-limit-val');
         const domReset = document.getElementById('btn-reset-all');
 
+        // Умный распределенный фетч с каскадом прокси-серверов и экранированием URL
+        async function fetchSmart(targetUrl) {
+            const encodedUrl = encodeURIComponent(targetUrl);
+            
+            // Сценарий 1: Через corsproxy.io (с фиксом параметров)
+            try {
+                const response = await fetch(`https://corsproxy.io/?${encodedUrl}`);
+                if (response.ok) return await response.json();
+            } catch (e) {
+                console.warn("Основной прокси corsproxy.io отклонил запрос. Переключаемся на резерв...");
+            }
+
+            // Сценарий 2: Через резервный allorigins.win
+            try {
+                const response = await fetch(`https://api.allorigins.win/raw?url=${encodedUrl}`);
+                if (response.ok) return await response.json();
+            } catch (e) {
+                console.warn("Резервный прокси allorigins отклонил запрос. Пробуем прямой контракт...");
+            }
+
+            // Сценарий 3: Напрямую (для сред с отключенным CORS)
+            const directResponse = await fetch(targetUrl);
+            if (!directResponse.ok) throw new Error(`Все шлюзы заблокированы. Статус ответа сервера: ${directResponse.status}`);
+            return await directResponse.json();
+        }
+
         async function runPipeline() {
             try {
-                // 1. Сбор котировок TON/RUB
-                const rateResponse = await fetch(CONFIG.API_COINGECKO);
-                if (!rateResponse.ok) throw new Error("Удаленный сервер CoinGecko отклонил прокси-запрос.");
-                const rateData = await rateResponse.json();
+                // 1. Парсинг курса TON
+                const rateData = await fetchSmart(CONFIG.TARGET_COINGECKO);
                 APP_STATE.tonToRubRate = Math.ceil(parseFloat(rateData["the-open-network"].rub));
                 domRate.textContent = `${APP_STATE.tonToRubRate.toLocaleString('ru-RU')} ₽`;
 
-                // 2. Сбор токенов из Portals
-                const portalsResponse = await fetch(CONFIG.API_PORTALS);
-                if (!portalsResponse.ok) throw new Error("Сервер Portals API отклонил прокси-запрос.");
-                const portalsData = await portalsResponse.json();
+                // 2. Парсинг предметов Portals
+                const portalsData = await fetchSmart(CONFIG.TARGET_PORTALS);
 
-                // 3. Вызов глубокого нормализатора JSON структуры
+                // 3. Нормализация структуры
                 normalizePortalsData(portalsData);
 
                 if (APP_STATE.rawItems.length === 0) {
-                    displaySystemError("API ответил успешно, но не передал массив предметов (items).");
+                    displaySystemError("Парсер отработал успешно, но валидных выставленных предметов (items) в вашей структуре не найдено.");
                     return;
                 }
 
-                // 4. Настройка ползунка цен
+                // 4. Калибровка фильтра цен
                 calibratePriceSlider();
 
-                // 5. Отрисовка
+                // 5. Рендеринг витрины
                 executeFiltering();
 
-                // Слушатели событий
+                // Привязка интерактивных событий
                 domSearch.addEventListener('input', executeFiltering);
                 domType.addEventListener('change', executeFiltering);
                 domPriceRange.addEventListener('input', handleSliderMovement);
@@ -409,7 +430,7 @@
                 domReset.addEventListener('click', clearFormFilters);
 
             } catch (error) {
-                console.error("Critical Failure:", error);
+                console.error("Critical Flow Blocked:", error);
                 displaySystemError(error.message);
             }
         }
@@ -505,7 +526,7 @@
             if (dataset.length === 0) {
                 domCatalog.innerHTML = `
                     <div class="state-container">
-                        Нет предметов, соответствующих критериям фильтра.
+                        Нет предметов, соответствующих критериям установленных фильтров.
                     </div>`;
                 return;
             }
@@ -524,7 +545,7 @@
                         <div class="item-title">${item.name}</div>
                         <div class="price-row">
                             <div class="price-rub">${finalRubPrice.toLocaleString('ru-RU')} ₽</div>
-                            <div class="price-ton">Оригинал: ${item.tonPrice} TON</div>
+                            <div class="price-ton">В оригинале: ${item.tonPrice} TON</div>
                         </div>
                         <a href="${CONFIG.FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
                     </div>
@@ -545,10 +566,10 @@
             domCatalog.innerHTML = `
                 <div class="state-container">
                     <div class="state-error">
-                        <p style="margin-bottom: 10px; font-weight: bold;">🛑 СБОЙ ПРИ ЗАГРУЗКЕ АКТУАЛЬНЫХ ДАННЫХ API:</p>
-                        <p style="font-size: 0.95rem; color: var(--text-main); font-family: monospace;">${message}</p>
+                        <p style="margin-bottom: 10px; font-weight: bold;">🛑 СБОЙ СЕТЕВОЙ ИНТЕГРАЦИИ API:</p>
+                        <p style="font-size: 0.95rem; color: var(--text-main); font-family: monospace; background: #0f172a; padding: 10px; border-radius: 6px;">${message}</p>
                         <p style="font-size: 0.85rem; margin-top: 15px; color: var(--text-muted);">
-                            Проверьте интернет-соединение или повторите попытку позже. Локальная сессия была отклонена удаленным узлом.
+                            Причина: Ваши прокси-шлюзы временно перегружены запросами или Portals API закрыл публичный доступ без авторизационных токенов.
                         </p>
                     </div>
                 </div>`;
