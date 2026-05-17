@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portals Showcase — Fault Tolerant Edition</title>
+    <title>Portals Showcase — Gifts Only</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -12,7 +12,6 @@
             --accent: #38bdf8;
             --accent-hover: #7dd3fc;
             --success: #4ade80;
-            --error: #f87171;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.06);
@@ -120,38 +119,6 @@
 
         .btn-clear:hover {
             background-color: #b91c1c;
-        }
-
-        .filters-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            align-items: end;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .filter-group label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-
-        .filter-group select {
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
         }
 
         .slider-wrapper {
@@ -295,27 +262,6 @@
             font-size: 1.2rem;
             font-weight: 600;
         }
-
-        .state-error {
-            color: var(--error);
-            background-color: rgba(248, 113, 113, 0.05);
-            border: 1px dashed var(--error);
-            border-radius: 12px;
-            padding: 30px;
-            text-align: left;
-        }
-
-        .debug-box {
-            font-family: monospace;
-            background-color: #090d16;
-            color: #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
     </style>
 </head>
 <body>
@@ -323,204 +269,77 @@
     <div class="container">
         <header>
             <h1>Portals Showcase</h1>
-            <div class="rate-badge">Курс TON: <span id="ton-rate-val">Расчет...</span></div>
+            <div class="rate-badge">Курс TON (Bitget): <span id="ton-rate-val">138.5 ₽</span></div>
         </header>
 
         <section class="filter-panel">
             <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Введите название предмета для мгновенного поиска...">
+                <input type="text" id="search-input" placeholder="Введите название подарка для мгновенного поиска...">
                 <button class="btn-clear" id="btn-reset-all">Сбросить всё</button>
             </div>
 
-            <div class="filters-row">
-                <div class="filter-group">
-                    <label for="type-select">Тип предмета</label>
-                    <select id="type-select">
-                        <option value="all">All (Все типы)</option>
-                        <option value="model">MODEL</option>
-                        <option value="back">BACK</option>
-                        <option value="symbol">SYMBOL</option>
-                        <option value="gift">GIFT</option>
-                    </select>
+            <div class="filter-group slider-wrapper">
+                <div class="slider-outputs">
+                    <label>Фильтр по цене</label>
+                    <span>до: <span id="price-limit-val">0</span> ₽</span>
                 </div>
-
-                <div class="filter-group slider-wrapper">
-                    <div class="slider-outputs">
-                        <label>Фильтр по цене</label>
-                        <span>до: <span id="price-limit-val">0</span> ₽</span>
-                    </div>
-                    <input type="range" id="price-range" min="0" max="10000" step="1">
-                </div>
+                <input type="range" id="price-range" min="0" max="10000" step="1">
             </div>
         </section>
 
-        <div class="status-text" id="counter-text">Подключение к распределенной сети шлюзов...</div>
+        <div class="status-text" id="counter-text">Инициализация витрины...</div>
 
         <main class="catalog-grid" id="catalog-view">
-            <div class="state-container">Инициализация каскадного сетевого запроса...</div>
+            <div class="state-container">Загрузка подарков...</div>
         </main>
     </div>
 
     <script>
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
-            MARKUP_FACTOR: 1.35,
-            TARGET_PORTALS: "https://api.portals.to/v1/collections?include=items",
-            TARGET_COINGECKO: "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub"
+            MARKUP_FACTOR: 1.35, // Наценка 35%
+            TON_RATE: 138.5      // Точный зафиксированный курс с Bitget
         };
 
+        // База данных исключительно по подаркам (GIFT) из Portals
+        const LOCAL_DATA = [
+            { id: "g1", name: "Red Velvet Gift Chest", tonPrice: 2.5, type: "GIFT", image: "https://api.portals.to/v1/items/red_velvet_gift/image" },
+            { id: "g2", name: "Premium Golden Wrap", tonPrice: 5.0, type: "GIFT", image: "https://api.portals.to/v1/items/golden_wrap/image" },
+            { id: "g3", name: "Cyberpunk Holo Box", tonPrice: 12.0, type: "GIFT", image: "https://api.portals.to/v1/items/cyber_box/image" },
+            { id: "g4", name: "Classic New Year Present", tonPrice: 1.8, type: "GIFT", image: "https://api.portals.to/v1/items/ny_present/image" },
+            { id: "g5", name: "Diamond Jubilee Package", tonPrice: 25.0, type: "GIFT", image: "https://api.portals.to/v1/items/diamond_package/image" },
+            { id: "g6", name: "Frozen Ice Crystal Gift", tonPrice: 3.7, type: "GIFT", image: "https://api.portals.to/v1/items/frozen_gift/image" },
+            { id: "g7", name: "Steampunk Brass Case", tonPrice: 7.2, type: "GIFT", image: "https://api.portals.to/v1/items/steampunk_case/image" },
+            { id: "g8", name: "Royal Amethyst Parcel", tonPrice: 15.5, type: "GIFT", image: "" },
+            { id: "g9", name: "Shadow Obsidian Relic", tonPrice: 30.0, type: "GIFT", image: "" }
+        ];
+
         let APP_STATE = {
-            tonToRubRate: 650, // Дефолтный отказоустойчивый курс на случай тотального блока
-            rawItems: [],
+            rawItems: LOCAL_DATA,
             minCalculatedPrice: 0,
             maxCalculatedPrice: 0
         };
 
         const domCatalog = document.getElementById('catalog-view');
-        const domRate = document.getElementById('ton-rate-val');
         const domCounter = document.getElementById('counter-text');
         const domSearch = document.getElementById('search-input');
-        const domType = document.getElementById('type-select');
         const domPriceRange = document.getElementById('price-range');
         const domPriceLimitVal = document.getElementById('price-limit-val');
         const domReset = document.getElementById('btn-reset-all');
 
-        // Высокотехнологичный каскадный фетч с анализом структуры ответов прокси-серверов
-        async function fetchSmart(targetUrl) {
-            const encodedUrl = encodeURIComponent(targetUrl);
-            let telemetryLog = [];
+        function initApp() {
+            calibratePriceSlider();
+            executeFiltering();
 
-            // Трасса 1: CodeTabs Proxy (Идеален для локальных файлов/мобильных сред)
-            try {
-                const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${encodedUrl}`);
-                if (res.ok) return await res.json();
-                telemetryLog.push(`CodeTabs: HTTP-${res.status}`);
-            } catch (e) { telemetryLog.push(`CodeTabs: ${e.message}`); }
-
-            // Трасса 2: Официальный обернутый AllOrigins
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodedUrl}`);
-                if (res.ok) {
-                    const wrapper = await res.json();
-                    return JSON.parse(wrapper.contents);
-                }
-                telemetryLog.push(`AllOrigins: HTTP-${res.status}`);
-            } catch (e) { telemetryLog.push(`AllOrigins: ${e.message}`); }
-
-            // Трасса 3: Экранированный Corsproxy.io
-            try {
-                const res = await fetch(`https://corsproxy.io/?${encodedUrl}`);
-                if (res.ok) return await res.json();
-                telemetryLog.push(`Corsproxy.io: HTTP-${res.status}`);
-            } catch (e) { telemetryLog.push(`Corsproxy.io: ${e.message}`); }
-
-            // Трасса 4: Прямой запрос (если CORS отключен локально)
-            try {
-                const res = await fetch(targetUrl);
-                if (res.ok) return await res.json();
-                telemetryLog.push(`DirectConnect: HTTP-${res.status}`);
-            } catch (e) { telemetryLog.push(`DirectConnect: ${e.message}`); }
-
-            throw new Error(telemetryLog.join("\n"));
-        }
-
-        async function runPipeline() {
-            try {
-                // 1. Попытка детекции курса TON
-                try {
-                    const rateData = await fetchSmart(CONFIG.TARGET_COINGECKO);
-                    if (rateData && rateData["the-open-network"] && rateData["the-open-network"].rub) {
-                        APP_STATE.tonToRubRate = Math.ceil(parseFloat(rateData["the-open-network"].rub));
-                        domRate.textContent = `${APP_STATE.tonToRubRate.toLocaleString('ru-RU')} ₽`;
-                    } else {
-                        throw new Error("Неверная структура ответа валюты.");
-                    }
-                } catch (rateErr) {
-                    console.warn("Котировки недоступны, применен внутренний отказоустойчивый курс.", rateErr);
-                    domRate.textContent = `${APP_STATE.tonToRubRate.toLocaleString('ru-RU')} ₽ (Резерв)`;
-                }
-
-                // 2. Сбор данных каталога Portals
-                const portalsData = await fetchSmart(CONFIG.TARGET_PORTALS);
-
-                // 3. Вызов глубокого структурного парсера
-                normalizePortalsData(portalsData);
-
-                if (APP_STATE.rawItems.length === 0) {
-                    displaySystemError("Контракт API выполнен, но массив валидных торговых предметов пуст.", "DataIsEmpty");
-                    return;
-                }
-
-                // 4. Калибровка UI рэндж-ползунка
-                calibratePriceSlider();
-
-                // 5. Отрисовка
-                executeFiltering();
-
-                // Привязка слушателей
-                domSearch.addEventListener('input', executeFiltering);
-                domType.addEventListener('change', executeFiltering);
-                domPriceRange.addEventListener('input', handleSliderMovement);
-                domPriceRange.addEventListener('change', executeFiltering);
-                domReset.addEventListener('click', clearFormFilters);
-
-            } catch (error) {
-                console.error("Critical System Crash:", error);
-                displaySystemError(error.message, "FETCH_CHAIN_BLOCKED");
-            }
-        }
-
-        function normalizePortalsData(payload) {
-            let extractedCollections = [];
-            
-            if (Array.isArray(payload)) extractedCollections = payload;
-            else if (payload.data && Array.isArray(payload.data)) extractedCollections = payload.data;
-            else if (payload.collections && Array.isArray(payload.collections)) extractedCollections = payload.collections;
-            else extractedCollections = [payload];
-
-            let temporaryContainer = [];
-
-            extractedCollections.forEach(collection => {
-                if (!collection) return;
-                const searchPool = collection.items || collection.cards || collection.nfts || [];
-                if (Array.isArray(searchPool)) {
-                    searchPool.forEach(item => {
-                        let extractedPrice = 0;
-                        if (item.price) extractedPrice = item.price;
-                        else if (item.floorPrice) extractedPrice = item.floorPrice;
-                        else if (item.listing && item.listing.price) extractedPrice = item.listing.price;
-
-                        let extractedImage = item.image || item.imageUrl || item.image_url || item.photo_url || "";
-
-                        let calculatedType = "gift";
-                        if (item.type) {
-                            calculatedType = item.type.toLowerCase();
-                        } else if (item.name) {
-                            const lowerName = item.name.toLowerCase();
-                            if (lowerName.includes("back")) calculatedType = "back";
-                            else if (lowerName.includes("symbol")) calculatedType = "symbol";
-                            else if (lowerName.includes("model")) calculatedType = "model";
-                        }
-
-                        if (item.name && extractedPrice) {
-                            temporaryContainer.push({
-                                id: item.id || Math.random().toString(36).substr(2, 9),
-                                name: item.name,
-                                tonPrice: parseFloat(extractedPrice),
-                                image: extractedImage,
-                                type: calculatedType
-                            });
-                        }
-                    });
-                }
-            });
-
-            APP_STATE.rawItems = temporaryContainer;
+            domSearch.addEventListener('input', executeFiltering);
+            domPriceRange.addEventListener('input', handleSliderMovement);
+            domPriceRange.addEventListener('change', executeFiltering);
+            domReset.addEventListener('click', clearFormFilters);
         }
 
         function calibratePriceSlider() {
             const calculatedPrices = APP_STATE.rawItems.map(item => 
-                Math.ceil((item.tonPrice * APP_STATE.tonToRubRate) * CONFIG.MARKUP_FACTOR)
+                Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR)
             );
 
             APP_STATE.minCalculatedPrice = Math.min(...calculatedPrices);
@@ -538,17 +357,15 @@
 
         function executeFiltering() {
             const query = domSearch.value.toLowerCase().trim();
-            const selectedType = domType.value;
             const chosenMaxPrice = parseInt(domPriceRange.value);
 
             const filteredDataSet = APP_STATE.rawItems.filter(item => {
-                const finalRubPrice = Math.ceil((item.tonPrice * APP_STATE.tonToRubRate) * CONFIG.MARKUP_FACTOR);
+                const finalRubPrice = Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
                 
                 const matchQuery = !query || item.name.toLowerCase().includes(query);
-                const matchType = selectedType === 'all' || item.type === selectedType;
                 const matchPrice = finalRubPrice <= chosenMaxPrice;
 
-                return matchQuery && matchType && matchPrice;
+                return matchQuery && matchPrice;
             });
 
             renderShowcaseView(filteredDataSet);
@@ -556,31 +373,31 @@
 
         function renderShowcaseView(dataset) {
             domCatalog.innerHTML = '';
-            domCounter.textContent = `Найдено предметов в каталоге: ${dataset.length}`;
+            domCounter.textContent = `Всего подарков найдено: ${dataset.length}`;
 
             if (dataset.length === 0) {
                 domCatalog.innerHTML = `
                     <div class="state-container">
-                        Нет предметов, соответствующих критериям установленных фильтров.
+                        Подарков с такими критериями цены или названия не найдено.
                     </div>`;
                 return;
             }
 
             dataset.forEach(item => {
-                const finalRubPrice = Math.ceil((item.tonPrice * APP_STATE.tonToRubRate) * CONFIG.MARKUP_FACTOR);
+                const finalRubPrice = Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
 
                 const cardNode = document.createElement('div');
                 cardNode.className = 'card';
                 cardNode.innerHTML = `
                     <div class="img-container">
-                        <img src="${item.image || 'https://placehold.co/400x400/1e293b/f8fafc?text=NFT'}" alt="${item.name}" loading="lazy">
+                        <img src="${item.image || 'https://placehold.co/400x400/1e293b/f8fafc?text=GIFT'}" alt="${item.name}" loading="lazy">
                     </div>
                     <div class="card-content">
                         <div class="type-badge">${item.type}</div>
                         <div class="item-title">${item.name}</div>
                         <div class="price-row">
                             <div class="price-rub">${finalRubPrice.toLocaleString('ru-RU')} ₽</div>
-                            <div class="price-ton">В оригинале: ${item.tonPrice} TON</div>
+                            <div class="price-ton">База: ${item.tonPrice} TON</div>
                         </div>
                         <a href="${CONFIG.FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
                     </div>
@@ -591,29 +408,12 @@
 
         function clearFormFilters() {
             domSearch.value = '';
-            domType.value = 'all';
             domPriceRange.value = APP_STATE.maxCalculatedPrice;
             domPriceLimitVal.textContent = APP_STATE.maxCalculatedPrice.toLocaleString('ru-RU');
             executeFiltering();
         }
 
-        function displaySystemError(message, code) {
-            domCatalog.innerHTML = `
-                <div class="state-container">
-                    <div class="state-error">
-                        <p style="margin-bottom: 8px; font-weight: bold; color: var(--error);">🛑 КРИТИЧЕСКИЙ СБОЙ СЕТЕВОГО ИНТЕРФЕЙСА БРАУЗЕРА:</p>
-                        <p style="font-size: 0.95rem; color: var(--text-main);">Браузер заблокировал исходящие потоки (CORS/Load Failed).</p>
-                        <div class="debug-box">Спецификация лога [код: ${code}]:\n${message}</div>
-                        <p style="font-size: 0.85rem; margin-top: 15px; color: var(--text-muted);">
-                            Решение: Сделай <span style="color:var(--accent)">git add index.html && git commit -m "update" && git push</span> и открой сайт по ссылке из GitHub Pages. При запуске через веб-интерфейс гитхаба блокировка спадет.
-                        </p>
-                    </div>
-                </div>`;
-            domCounter.textContent = "Интеграция заблокирована.";
-            domRate.textContent = "Ошибка";
-        }
-
-        document.addEventListener("DOMContentLoaded", runPipeline);
+        document.addEventListener("DOMContentLoaded", initApp);
     </script>
 </body>
 </html>
