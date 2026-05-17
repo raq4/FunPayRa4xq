@@ -39,12 +39,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        /* Панель фильтров в стиле Portals */
         .filters-panel {
             display: flex;
             flex-wrap: wrap;
@@ -84,11 +78,6 @@
             font-size: 0.95rem;
             outline: none;
             cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .filter-group select:focus {
-            border-color: var(--accent-color);
         }
 
         .stats {
@@ -196,7 +185,6 @@
             border-radius: 8px;
             font-weight: 700;
             font-size: 1rem;
-            transition: background-color 0.2s;
             box-sizing: border-box;
         }
 
@@ -217,25 +205,43 @@
 
     <header>
         <h1>FunPayRa4xq Marketplace</h1>
-        <p>Все подарки Telegram с наценкой 35% по курсу Bitget</p>
     </header>
 
     <section class="filters-panel">
         <div class="filter-group">
-            <label for="filter-collection">Collection</label>
-            <select id="filter-collection"><option value="all">All Collections</option></select>
+            <label for="filter-model">Model (Модель)</label>
+            <select id="filter-model">
+                <option value="all">All Models</option>
+                <option value="Pool Float">Pool Float</option>
+                <option value="Ice Cream">Ice Cream</option>
+                <option value="Mood Pack">Mood Pack</option>
+                <option value="Input Key">Input Key</option>
+                <option value="Spotted Owl">Spotted Owl</option>
+                <option value="Cute Cat">Cute Cat</option>
+                <option value="Frog Prince">Frog Prince</option>
+            </select>
         </div>
         <div class="filter-group">
-            <label for="filter-model">Model</label>
-            <select id="filter-model"><option value="all">All Models</option></select>
+            <label for="filter-back">Back (Фон)</label>
+            <select id="filter-back">
+                <option value="all">All Backs</option>
+                <option value="Black">Black</option>
+                <option value="Blue">Blue</option>
+                <option value="Green">Green</option>
+                <option value="Pink">Pink</option>
+                <option value="Purple">Purple</option>
+            </select>
         </div>
         <div class="filter-group">
-            <label for="filter-back">Back</label>
-            <select id="filter-back"><option value="all">All Backs</option></select>
-        </div>
-        <div class="filter-group">
-            <label for="filter-symbol">Symbol</label>
-            <select id="filter-symbol"><option value="all">All Symbols</option></select>
+            <label for="filter-symbol">Symbol (Символ)</label>
+            <select id="filter-symbol">
+                <option value="all">All Symbols</option>
+                <option value="Heart">Heart</option>
+                <option value="Star">Star</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Club">Club</option>
+                <option value="Spade">Spade</option>
+            </select>
         </div>
     </section>
 
@@ -246,23 +252,20 @@
     </main>
 
     <script>
-        // Настройки
         const FUNPAY_PROFILE = "https://funpay.com/users/13409860/"; 
         const TON_RATE = 138; 
         const MARKUP = 1.35;  
+        const MAX_PRICE_TON = 9; // <--- ЖЕСТКИЙ ЛИМИТ ДО 9 TON
 
         const catalog = document.getElementById('catalog');
         const statsCounter = document.getElementById('stats-counter');
         
-        // Селекты фильтров
-        const selectCollection = document.getElementById('filter-collection');
         const selectModel = document.getElementById('filter-model');
         const selectBack = document.getElementById('filter-back');
         const selectSymbol = document.getElementById('filter-symbol');
 
-        let allItems = []; // Здесь будут храниться все распарсенные предметы
+        let allItems = []; 
 
-        // Функция загрузки данных
         fetch('market_data.json')
             .then(response => {
                 if (!response.ok) throw new Error('Ошибка при загрузке JSON');
@@ -274,61 +277,26 @@
                     return;
                 }
 
-                allItems = data.results;
+                // Сразу при загрузке фильтруем предметы, оставляя строго до 9 TON
+                allItems = data.results.filter(item => parseFloat(item.price) <= MAX_PRICE_TON);
                 
-                // Генерируем выпадающие списки на основе свойств из JSON
-                populateFilters(allItems);
-                
-                // Первичный рендер всех подарков
                 renderCatalog(allItems);
 
-                // Вешаем события изменения на фильтры
-                [selectCollection, selectModel, selectBack, selectSymbol].forEach(select => {
+                [selectModel, selectBack, selectSymbol].forEach(select => {
                     select.addEventListener('change', filterProducts);
                 });
             })
             .catch(err => {
                 console.error(err);
-                catalog.innerHTML = '<div class="error">Не удалось загрузить витрину. Проверьте market_data.json</div>';
+                catalog.innerHTML = '<div class="error">Не удалось загрузить витрину. Проверьте маркет-данные.</div>';
             });
 
-        // Функция автоматического заполнения фильтров
-        function populateFilters(items) {
-            const collections = new Set();
-            const models = new Set();
-            const backs = new Set();
-            const symbols = new Set();
-
-            items.forEach(item => {
-                if (item.collection) collections.add(item.collection);
-                if (item.model) models.add(item.model);
-                if (item.back) backs.add(item.back);
-                if (item.symbol) symbols.add(item.symbol);
-            });
-
-            // Заполняем селекты отсортированными опциями
-            appendOptions(selectCollection, collections);
-            appendOptions(selectModel, models);
-            appendOptions(selectBack, backs);
-            appendOptions(selectSymbol, symbols);
-        }
-
-        function appendOptions(selectElement, setValues) {
-            Array.from(setValues).sort().forEach(val => {
-                const opt = document.createElement('option');
-                opt.value = val;
-                opt.textContent = val;
-                selectElement.appendChild(opt);
-            });
-        }
-
-        // Функция отрисовки карточек
         function renderCatalog(items) {
             catalog.innerHTML = '';
-            statsCounter.textContent = `Найдено предметов: ${items.length}`;
+            statsCounter.textContent = `Найдено предметов (до 9 TON): ${items.length}`;
 
             if (items.length === 0) {
-                catalog.innerHTML = '<div class="loading">Нет предметов, соответствующих выбранным фильтрам.</div>';
+                catalog.innerHTML = '<div class="loading">Нет предметов, подходящих под фильтры.</div>';
                 return;
             }
 
@@ -356,20 +324,20 @@
             });
         }
 
-        // Логика фильтрации
+        // Умный поиск по названию предмета (работает, даже если в JSON нет отдельных полей свойств)
         function filterProducts() {
-            const chosenCollection = selectCollection.value;
-            const chosenModel = selectModel.value;
-            const chosenBack = selectBack.value;
-            const chosenSymbol = selectSymbol.value;
+            const chosenModel = selectModel.value.toLowerCase();
+            const chosenBack = selectBack.value.toLowerCase();
+            const chosenSymbol = selectSymbol.value.toLowerCase();
 
             const filtered = allItems.filter(item => {
-                const matchCollection = (chosenCollection === 'all' || item.collection === chosenCollection);
-                const matchModel = (chosenModel === 'all' || item.model === chosenModel);
-                const matchBack = (chosenBack === 'all' || item.back === chosenBack);
-                const matchSymbol = (chosenSymbol === 'all' || item.symbol === chosenSymbol);
+                const itemName = item.name.toLowerCase();
+                
+                const matchModel = (chosenModel === 'all' || itemName.includes(chosenModel));
+                const matchBack = (chosenBack === 'all' || itemName.includes(chosenBack));
+                const matchSymbol = (chosenSymbol === 'all' || itemName.includes(chosenSymbol));
 
-                return matchCollection && matchModel && matchBack && matchSymbol;
+                return matchModel && matchBack && matchSymbol;
             });
 
             renderCatalog(filtered);
