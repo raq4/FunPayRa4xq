@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portals Showcase — Gifts Only</title>
+    <title>Portals Showcase — Gifts Market</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -121,6 +121,38 @@
             background-color: #b91c1c;
         }
 
+        .filters-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+
         .slider-wrapper {
             display: flex;
             flex-direction: column;
@@ -176,16 +208,24 @@
             padding-top: 100%;
             position: relative;
             background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(0,0,0,0) 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .img-container img {
+        .img-container img, .img-container svg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 16px;
+            padding: 24px;
+        }
+
+        .img-container svg {
+            fill: var(--accent);
+            opacity: 0.8;
         }
 
         .card-content {
@@ -278,12 +318,22 @@
                 <button class="btn-clear" id="btn-reset-all">Сбросить всё</button>
             </div>
 
-            <div class="filter-group slider-wrapper">
-                <div class="slider-outputs">
-                    <label>Фильтр по цене</label>
-                    <span>до: <span id="price-limit-val">0</span> ₽</span>
+            <div class="filters-row">
+                <div class="filter-group slider-wrapper">
+                    <div class="slider-outputs">
+                        <label>Фильтр по цене</label>
+                        <span>до: <span id="price-limit-val">0</span> ₽</span>
+                    </div>
+                    <input type="range" id="price-range" min="0" max="10000" step="1">
                 </div>
-                <input type="range" id="price-range" min="0" max="10000" step="1">
+
+                <div class="filter-group">
+                    <label for="sort-select">Сортировка цены</label>
+                    <select id="sort-select">
+                        <option value="asc">Сначала дешевле</option>
+                        <option value="desc">Сначала дороже</option>
+                    </select>
+                </div>
             </div>
         </section>
 
@@ -298,20 +348,82 @@
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
             MARKUP_FACTOR: 1.35, // Наценка 35%
-            TON_RATE: 138.5      // Точный зафиксированный курс с Bitget
+            TON_RATE: 138.5      // Курс с Bitget
         };
 
-        // База данных исключительно по подаркам (GIFT) из Portals
+        // База данных подарков, строго по твоим скриншотам
         const LOCAL_DATA = [
-            { id: "g1", name: "Red Velvet Gift Chest", tonPrice: 2.5, type: "GIFT", image: "https://api.portals.to/v1/items/red_velvet_gift/image" },
-            { id: "g2", name: "Premium Golden Wrap", tonPrice: 5.0, type: "GIFT", image: "https://api.portals.to/v1/items/golden_wrap/image" },
-            { id: "g3", name: "Cyberpunk Holo Box", tonPrice: 12.0, type: "GIFT", image: "https://api.portals.to/v1/items/cyber_box/image" },
-            { id: "g4", name: "Classic New Year Present", tonPrice: 1.8, type: "GIFT", image: "https://api.portals.to/v1/items/ny_present/image" },
-            { id: "g5", name: "Diamond Jubilee Package", tonPrice: 25.0, type: "GIFT", image: "https://api.portals.to/v1/items/diamond_package/image" },
-            { id: "g6", name: "Frozen Ice Crystal Gift", tonPrice: 3.7, type: "GIFT", image: "https://api.portals.to/v1/items/frozen_gift/image" },
-            { id: "g7", name: "Steampunk Brass Case", tonPrice: 7.2, type: "GIFT", image: "https://api.portals.to/v1/items/steampunk_case/image" },
-            { id: "g8", name: "Royal Amethyst Parcel", tonPrice: 15.5, type: "GIFT", image: "" },
-            { id: "g9", name: "Shadow Obsidian Relic", tonPrice: 30.0, type: "GIFT", image: "" }
+            { id: "g1", name: "Instant Ramen", tonPrice: 1.67, type: "GIFT" },
+            { id: "g2", name: "Snake Box", tonPrice: 1.67, type: "GIFT" },
+            { id: "g3", name: "Xmas Stocking", tonPrice: 1.67, type: "GIFT" },
+            { id: "g4", name: "Lunar Snake", tonPrice: 1.68, type: "GIFT" },
+            { id: "g5", name: "Candy Cane", tonPrice: 1.73, type: "GIFT" },
+            { id: "g6", name: "Whip Cupcake", tonPrice: 1.74, type: "GIFT" },
+            { id: "g7", name: "Vice Cream", tonPrice: 1.78, type: "GIFT" },
+            { id: "g8", name: "Chill Flame", tonPrice: 1.83, type: "GIFT" },
+            { id: "g9", name: "Hypno Lollipop", tonPrice: 1.84, type: "GIFT" },
+            { id: "g10", name: "Holiday Drink", tonPrice: 1.88, type: "GIFT" },
+            { id: "g11", name: "Ice Cream", tonPrice: 1.88, type: "GIFT" },
+            { id: "g12", name: "Big Year", tonPrice: 1.91, type: "GIFT" },
+            { id: "g13", name: "Star Notepad", tonPrice: 1.95, type: "GIFT" },
+            { id: "g14", name: "Jester Hat", tonPrice: 1.98, type: "GIFT" },
+            { id: "g15", name: "Pet Snake", tonPrice: 1.99, type: "GIFT" },
+            { id: "g16", name: "Easter Egg", tonPrice: 2.00, type: "GIFT" },
+            { id: "g17", name: "Party Sparkler", tonPrice: 2.00, type: "GIFT" },
+            { id: "g18", name: "Fresh Socks", tonPrice: 2.01, type: "GIFT" },
+            { id: "g19", name: "Tama Gadget", tonPrice: 2.08, type: "GIFT" },
+            { id: "g20", name: "Winter Wreath", tonPrice: 2.09, type: "GIFT" },
+            { id: "g21", name: "Hex Pot", tonPrice: 2.11, type: "GIFT" },
+            { id: "g22", name: "Happy Brownie", tonPrice: 2.14, type: "GIFT" },
+            { id: "g23", name: "Pool Float", tonPrice: 2.16, type: "GIFT" },
+            { id: "g24", name: "Ginger Cookie", tonPrice: 2.29, type: "GIFT" },
+            { id: "g25", name: "Stellar Rocket", tonPrice: 2.29, type: "GIFT" },
+            { id: "g26", name: "B-Day Candle", tonPrice: 2.43, type: "GIFT" },
+            { id: "g27", name: "Santa Hat", tonPrice: 2.44, type: "GIFT" },
+            { id: "g28", name: "Lol Pop", tonPrice: 2.46, type: "GIFT" },
+            { id: "g29", name: "Spiced Wine", tonPrice: 2.49, type: "GIFT" },
+            { id: "g30", name: "Mood Pack", tonPrice: 2.54, type: "GIFT" },
+            { id: "g31", name: "Clover Pin", tonPrice: 2.58, type: "GIFT" },
+            { id: "g32", name: "Pretty Posy", tonPrice: 2.62, type: "GIFT" },
+            { id: "g33", name: "Mousse Cake", tonPrice: 2.65, type: "GIFT" },
+            { id: "g34", name: "Restless Jar", tonPrice: 2.65, type: "GIFT" },
+            { id: "g35", name: "Bow Tie", tonPrice: 2.70, type: "GIFT" },
+            { id: "g36", name: "Input Key", tonPrice: 2.77, type: "GIFT" },
+            { id: "g37", name: "Cookie Heart", tonPrice: 2.78, type: "GIFT" },
+            { id: "g38", name: "Jack-in-the-Box", tonPrice: 2.78, type: "GIFT" },
+            { id: "g39", name: "Timeless Book", tonPrice: 2.78, type: "GIFT" },
+            { id: "g40", name: "Victory Medal", tonPrice: 2.79, type: "GIFT" },
+            { id: "g41", name: "Homemade Cake", tonPrice: 2.84, type: "GIFT" },
+            { id: "g42", name: "Money Pot", tonPrice: 2.85, type: "GIFT" },
+            { id: "g43", name: "Light Sword", tonPrice: 2.96, type: "GIFT" },
+            { id: "g44", name: "Snow Mittens", tonPrice: 2.98, type: "GIFT" },
+            { id: "g45", name: "Snoop Dogg", tonPrice: 3.04, type: "GIFT" },
+            { id: "g46", name: "Lush Bouquet", tonPrice: 3.10, type: "GIFT" },
+            { id: "g47", name: "Moon Pendant", tonPrice: 3.16, type: "GIFT" },
+            { id: "g48", name: "Snow Globe", tonPrice: 3.25, type: "GIFT" },
+            { id: "g49", name: "Spring Basket", tonPrice: 3.35, type: "GIFT" },
+            { id: "g50", name: "Swag Bag", tonPrice: 3.35, type: "GIFT" },
+            { id: "g51", name: "Faith Amulet", tonPrice: 3.36, type: "GIFT" },
+            { id: "g52", name: "Witch Hat", tonPrice: 3.48, type: "GIFT" },
+            { id: "g53", name: "Eternal Candle", tonPrice: 3.49, type: "GIFT" },
+            { id: "g54", name: "Spy Agaric", tonPrice: 3.49, type: "GIFT" },
+            { id: "g55", name: "Desk Calendar", tonPrice: 3.70, type: "GIFT" },
+            { id: "g56", name: "Evil Eye", tonPrice: 4.08, type: "GIFT" },
+            { id: "g57", name: "Bunny Muffin", tonPrice: 4.49, type: "GIFT" },
+            { id: "g58", name: "Jolly Chimp", tonPrice: 4.61, type: "GIFT" },
+            { id: "g59", name: "Joyful Bundle", tonPrice: 4.69, type: "GIFT" },
+            { id: "g60", name: "Jelly Bunny", tonPrice: 5.00, type: "GIFT" },
+            { id: "g61", name: "Jingle Bells", tonPrice: 5.48, type: "GIFT" },
+            { id: "g62", name: "Hanging Star", tonPrice: 5.88, type: "GIFT" },
+            { id: "g63", name: "Sleigh Bell", tonPrice: 6.07, type: "GIFT" },
+            { id: "g64", name: "Berry Box", tonPrice: 6.40, type: "GIFT" },
+            { id: "g65", name: "Love Candle", tonPrice: 6.50, type: "GIFT" },
+            { id: "g66", name: "Valentine Box", tonPrice: 6.55, type: "GIFT" },
+            { id: "g67", name: "Sakura Flower", tonPrice: 7.36, type: "GIFT" },
+            { id: "g68", name: "Flying Broom", tonPrice: 7.59, type: "GIFT" },
+            { id: "g69", name: "Crystal Ball", tonPrice: 7.61, type: "GIFT" },
+            { id: "g70", name: "Top Hat", tonPrice: 7.88, type: "GIFT" },
+            { id: "g71", name: "Record Player", tonPrice: 7.94, type: "GIFT" }
         ];
 
         let APP_STATE = {
@@ -325,7 +437,14 @@
         const domSearch = document.getElementById('search-input');
         const domPriceRange = document.getElementById('price-range');
         const domPriceLimitVal = document.getElementById('price-limit-val');
+        const domSort = document.getElementById('sort-select');
         const domReset = document.getElementById('btn-reset-all');
+
+        // Шаблон дефолтной иконки подарка (SVG), чтобы избежать битых картинок с вопросительным знаком
+        const GIFT_SVG = `
+            <svg viewBox="0 0 24 24">
+                <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35-.54-.81-1.45-1.35-2.5-1.35-1.66 0-3 1.34-3 3 0 .35.07.69.18 1H5c-1.1 0-2 .9-2 2v3c0 .55.45 1 1 1h1v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V11h1c.55 0 1-.45 1-1V8c0-1.1-.9-2-2-2zM15 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-6 1c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1zM5 8h14v2H5V8zm12 12H7V11h10v9z"/>
+            </svg>`;
 
         function initApp() {
             calibratePriceSlider();
@@ -334,6 +453,7 @@
             domSearch.addEventListener('input', executeFiltering);
             domPriceRange.addEventListener('input', handleSliderMovement);
             domPriceRange.addEventListener('change', executeFiltering);
+            domSort.addEventListener('change', executeFiltering);
             domReset.addEventListener('click', clearFormFilters);
         }
 
@@ -358,14 +478,24 @@
         function executeFiltering() {
             const query = domSearch.value.toLowerCase().trim();
             const chosenMaxPrice = parseInt(domPriceRange.value);
+            const sortOrder = domSort.value;
 
-            const filteredDataSet = APP_STATE.rawItems.filter(item => {
+            // 1. Фильтрация по поиску и максимальной цене
+            let filteredDataSet = APP_STATE.rawItems.filter(item => {
                 const finalRubPrice = Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
                 
                 const matchQuery = !query || item.name.toLowerCase().includes(query);
                 const matchPrice = finalRubPrice <= chosenMaxPrice;
 
                 return matchQuery && matchPrice;
+            });
+
+            // 2. Сортировка цены (Дешевле / Дороже)
+            filteredDataSet.sort((a, b) => {
+                const priceA = Math.ceil((a.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+                const priceB = Math.ceil((b.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+                
+                return sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
             });
 
             renderShowcaseView(filteredDataSet);
@@ -388,9 +518,11 @@
 
                 const cardNode = document.createElement('div');
                 cardNode.className = 'card';
+                
+                // Используем SVG шаблон вместо заглушек, чтобы убрать знаки вопроса
                 cardNode.innerHTML = `
                     <div class="img-container">
-                        <img src="${item.image || 'https://placehold.co/400x400/1e293b/f8fafc?text=GIFT'}" alt="${item.name}" loading="lazy">
+                        ${GIFT_SVG}
                     </div>
                     <div class="card-content">
                         <div class="type-badge">${item.type}</div>
@@ -408,6 +540,7 @@
 
         function clearFormFilters() {
             domSearch.value = '';
+            domSort.value = 'asc';
             domPriceRange.value = APP_STATE.maxCalculatedPrice;
             domPriceLimitVal.textContent = APP_STATE.maxCalculatedPrice.toLocaleString('ru-RU');
             executeFiltering();
