@@ -2,24 +2,197 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>FunPayRa4xq Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunPayRa4xq — Витрина подарков Telegram</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #38bdf8;
+            --price-color: #4ade80;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+        }
+
+        .img-container {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, rgba(0,0,0,0) 70%);
+        }
+
+        .img-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .number {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .footer-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--price-color);
+        }
+
+        .price::after {
+            content: ' TON';
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .loading, .error {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Витрина подарков FunPayRa4xq</h1>
-    <div id="market-data">Загрузка данных...</div>
+
+    <header>
+        <h1>FunPayRa4xq Marketplace</h1>
+        <p>Автоматическая витрина лимитированных подарков Telegram</p>
+    </header>
+
+    <main class="grid" id="catalog">
+        <div class="loading">Загрузка предметов из базы данных...</div>
+    </main>
 
     <script>
-        // Пробуем прочитать созданный скриптом JSON файл
+        const catalog = document.getElementById('catalog');
+
+        // Подгружаем файл market_data.json, который генерирует твой Python скрипт
         fetch('market_data.json')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка сети при загрузке JSON');
+                return response.json();
+            })
             .then(data => {
-                console.log(data);
-                document.getElementById('market-data').innerText = "Данные маркета успешно загружены! Найдено предметов: " + (data.nfts ? data.nfts.length : 0);
+                // Очищаем лоадер
+                catalog.innerHTML = '';
+
+                // Проверяем, есть ли результаты в ключе results
+                if (!data.results || data.results.length === 0) {
+                    catalog.innerHTML = '<div class="loading">В данный момент нет доступных товаров.</div>';
+                    return;
+                }
+
+                // Перебираем массив предметов
+                data.results.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    // Собираем HTML карточки
+                    card.innerHTML = `
+                        <div class="img-container">
+                            <img src="${item.photo_url}" alt="${item.name}" loading="lazy">
+                        </div>
+                        <div class="info">
+                            <div class="number">#${item.external_collection_number || 'NFT'}</div>
+                            <div class="name">${item.name}</div>
+                            <div class="footer-card">
+                                <div class="price">${item.price}</div>
+                            </div>
+                        </div>
+                    `;
+                    catalog.appendChild(card);
+                });
             })
             .catch(err => {
-                document.getElementById('market-data').innerText = "Ошибка загрузки JSON.";
                 console.error(err);
+                catalog.innerHTML = '<div class="error">Не удалось загрузить витрину. Проверьте market_data.json</div>';
             });
     </script>
+
 </body>
 </html>
+
