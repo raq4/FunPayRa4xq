@@ -45,7 +45,7 @@
             gap: 12px;
             width: 100%;
             max-width: 1200px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding: 15px;
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -209,38 +209,21 @@
 
     <section class="filters-panel">
         <div class="filter-group">
-            <label for="filter-model">Model (Модель)</label>
+            <label for="filter-model">Model</label>
             <select id="filter-model">
                 <option value="all">All Models</option>
-                <option value="Pool Float">Pool Float</option>
-                <option value="Ice Cream">Ice Cream</option>
-                <option value="Mood Pack">Mood Pack</option>
-                <option value="Input Key">Input Key</option>
-                <option value="Spotted Owl">Spotted Owl</option>
-                <option value="Cute Cat">Cute Cat</option>
-                <option value="Frog Prince">Frog Prince</option>
             </select>
         </div>
         <div class="filter-group">
-            <label for="filter-back">Back (Фон)</label>
+            <label for="filter-back">Back</label>
             <select id="filter-back">
                 <option value="all">All Backs</option>
-                <option value="Black">Black</option>
-                <option value="Blue">Blue</option>
-                <option value="Green">Green</option>
-                <option value="Pink">Pink</option>
-                <option value="Purple">Purple</option>
             </select>
         </div>
         <div class="filter-group">
-            <label for="filter-symbol">Symbol (Символ)</label>
+            <label for="filter-symbol">Symbol</label>
             <select id="filter-symbol">
                 <option value="all">All Symbols</option>
-                <option value="Heart">Heart</option>
-                <option value="Star">Star</option>
-                <option value="Diamond">Diamond</option>
-                <option value="Club">Club</option>
-                <option value="Spade">Spade</option>
             </select>
         </div>
     </section>
@@ -255,7 +238,29 @@
         const FUNPAY_PROFILE = "https://funpay.com/users/13409860/"; 
         const TON_RATE = 138; 
         const MARKUP = 1.35;  
-        const MAX_PRICE_TON = 9; // <--- ЖЕСТКИЙ ЛИМИТ ДО 9 TON
+        const MAX_PRICE_TON = 9.0; // Строгий лимит до 9 TON
+
+        // Интегрированные списки официальных атрибутов с Portals API
+        const portalsData = {
+            models: [
+                "Instant Ramen", "Snake Box", "Xmas Stocking", "Lunar Snake", "Candy Cane", 
+                "Whip Cupcake", "Vice Cream", "Chill Flame", "Hypno Lollipop", "Holiday Drink", 
+                "Ice Cream", "Big Year", "Star Notepad", "Jester Hat", "Pet Snake", "Easter Egg", 
+                "Party Sparkler", "Fresh Socks", "Tama Gadget", "Winter Wreath", "Hex Pot", 
+                "Happy Brownie", "Pool Float", "Ginger Cookie", "Stellar Rocket", "B-Day Candle", 
+                "Santa Hat", "Lol Pop", "Spiced Wine", "Mood Pack", "Clover Pin", "Pretty Posy", 
+                "Mousse Cake", "Restless Jar", "Bow Tie", "Input Key", "Cookie Heart", 
+                "Jack-in-the-Box", "Timeless Book", "Victory Medal", "Homemade Cake", "Money Pot", 
+                "Light Sword", "Snow Mittens", "Snoop Dogg", "Lush Bouquet", "Moon Pendant", 
+                "Snow Globe", "Spring Basket", "Swag Bag", "Faith Amulet", "Witch Hat", 
+                "Eternal Candle", "Spy Agaric", "Desk Calendar", "Evil Eye", "Bunny Muffin", 
+                "Jolly Chimp", "Joyful Bundle", "Jelly Bunny", "Jingle Bells", "Hanging Star", 
+                "Sleigh Bell", "Berry Box", "Love Candle", "Valentine Box", "Sakura Flower", 
+                "Flying Broom", "Crystal Ball", "Top Hat", "Record Player"
+            ],
+            backs: ["Black", "Blue", "Green", "Pink", "Purple", "Red", "Gold", "White", "Yellow", "Orange", "Gray", "Aqua"],
+            symbols: ["Heart", "Star", "Diamond", "Club", "Spade", "Trophy", "None"]
+        };
 
         const catalog = document.getElementById('catalog');
         const statsCounter = document.getElementById('stats-counter');
@@ -265,6 +270,30 @@
         const selectSymbol = document.getElementById('filter-symbol');
 
         let allItems = []; 
+
+        // Инициализация списков фильтров при старте страницы
+        function initFilterSelects() {
+            portalsData.models.sort().forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.toLowerCase();
+                opt.textContent = m;
+                selectModel.appendChild(opt);
+            });
+            portalsData.backs.sort().forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b.toLowerCase();
+                opt.textContent = b;
+                selectBack.appendChild(opt);
+            });
+            portalsData.symbols.sort().forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.toLowerCase();
+                opt.textContent = s;
+                selectSymbol.appendChild(opt);
+            });
+        }
+
+        initFilterSelects();
 
         fetch('market_data.json')
             .then(response => {
@@ -277,7 +306,7 @@
                     return;
                 }
 
-                // Сразу при загрузке фильтруем предметы, оставляя строго до 9 TON
+                // Жесткий фильтр: оставляем на сайте только подарки со скринов (до 9 TON)
                 allItems = data.results.filter(item => parseFloat(item.price) <= MAX_PRICE_TON);
                 
                 renderCatalog(allItems);
@@ -293,10 +322,10 @@
 
         function renderCatalog(items) {
             catalog.innerHTML = '';
-            statsCounter.textContent = `Найдено предметов (до 9 TON): ${items.length}`;
+            statsCounter.textContent = `Найдено предметов: ${items.length}`;
 
             if (items.length === 0) {
-                catalog.innerHTML = '<div class="loading">Нет предметов, подходящих под фильтры.</div>';
+                catalog.innerHTML = '<div class="loading">Нет предметов, соответствующих выбранным фильтрам.</div>';
                 return;
             }
 
@@ -324,17 +353,20 @@
             });
         }
 
-        // Умный поиск по названию предмета (работает, даже если в JSON нет отдельных полей свойств)
+        // Продвинутый маппинг фильтрации по официальной базе Portals
         function filterProducts() {
-            const chosenModel = selectModel.value.toLowerCase();
-            const chosenBack = selectBack.value.toLowerCase();
-            const chosenSymbol = selectSymbol.value.toLowerCase();
+            const chosenModel = selectModel.value;
+            const chosenBack = selectBack.value;
+            const chosenSymbol = selectSymbol.value;
 
             const filtered = allItems.filter(item => {
                 const itemName = item.name.toLowerCase();
                 
+                // Проверка модели
                 const matchModel = (chosenModel === 'all' || itemName.includes(chosenModel));
+                // Проверка фона
                 const matchBack = (chosenBack === 'all' || itemName.includes(chosenBack));
+                // Проверка символа
                 const matchSymbol = (chosenSymbol === 'all' || itemName.includes(chosenSymbol));
 
                 return matchModel && matchBack && matchSymbol;
