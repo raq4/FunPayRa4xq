@@ -3,80 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FunPayRa4xq — Витрина подарков</title>
+    <title>FunPay Витрина — Telegram NFT Gifts</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
+            --bg-main: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-input: #1e2640;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --price: #4ade80;
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-color: #38bdf8;
-            --price-color: #4ade80;
-            --filter-bg: #334155;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         header {
-            text-align: center;
+            width: 100%;
+            max-width: 1200px;
             margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         header h1 {
-            font-size: 2.3rem;
-            margin-bottom: 5px;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #818cf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .filters-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
+        .rate-badge {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .rate-badge span {
+            color: var(--price);
+            font-weight: bold;
+        }
+
+        /* ПАНЕЛЬ ФИЛЬТРОВ И ПОИСКА */
+        .controls-panel {
             width: 100%;
             max-width: 1200px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-sizing: border-box;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .search-row input {
+            flex: 1;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-row input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-reset {
+            background-color: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-reset:hover {
+            background-color: #dc2626;
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-width: 160px;
+            gap: 6px;
         }
 
         .filter-group label {
             font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 5px;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.5px;
         }
 
         .filter-group select {
-            background-color: var(--filter-bg);
-            color: var(--text-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px;
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
             border-radius: 8px;
             font-size: 0.95rem;
             outline: none;
+            cursor: pointer;
+        }
+
+        /* Фильтр диапазона цен */
+        .price-slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .price-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .price-labels span b {
+            color: var(--accent);
+        }
+
+        .price-slider-container input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
             cursor: pointer;
         }
 
@@ -88,38 +186,38 @@
             font-size: 0.95rem;
         }
 
+        /* СЕТКА С КАРТОЧКАМИ */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
             gap: 25px;
             width: 100%;
             max-width: 1200px;
         }
 
         .card {
-            background-color: var(--card-bg);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.15);
         }
 
-        .img-container {
+        .img-wrapper {
+            position: relative;
             width: 100%;
             padding-top: 100%;
-            position: relative;
-            background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(0,0,0,0) 75%);
         }
 
-        .img-container img {
+        .img-wrapper img {
             position: absolute;
             top: 0;
             left: 0;
@@ -127,49 +225,60 @@
             height: 100%;
             object-fit: contain;
             padding: 15px;
-            box-sizing: border-box;
         }
 
         .info {
-            padding: 20px;
+            padding: 18px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
 
-        .number {
-            font-size: 0.85rem;
-            color: var(--accent-color);
-            font-weight: 600;
+        .collection-tag {
+            font-size: 0.75rem;
+            color: var(--accent);
             text-transform: uppercase;
-            margin-bottom: 5px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        .name {
-            font-size: 1.15rem;
-            font-weight: bold;
-            margin-bottom: 15px;
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: 700;
             line-height: 1.3;
+            margin-bottom: 12px;
+            min-height: 2.6rem;
         }
 
-        .price-container {
+        .attributes-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        .price-box {
             margin-top: auto;
             margin-bottom: 15px;
         }
 
-        .price {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--price-color);
-        }
-
-        .price::after {
-            content: ' ₽';
-            font-size: 1.1rem;
+        .rub-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--price);
         }
 
         .ton-price {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -177,71 +286,84 @@
         .btn-buy {
             display: block;
             width: 100%;
-            padding: 12px 0;
-            background-color: var(--accent-color);
-            color: var(--bg-color);
+            background-color: var(--accent);
+            color: #000;
             text-align: center;
-            text-decoration: none;
-            border-radius: 8px;
+            padding: 12px 0;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 1rem;
-            box-sizing: border-box;
+            text-decoration: none;
+            transition: background-color 0.2s;
         }
 
         .btn-buy:hover {
-            background-color: #7dd3fc;
+            background-color: var(--accent-hover);
         }
 
         .loading, .error {
-            font-size: 1.2rem;
-            color: var(--text-muted);
             grid-column: 1 / -1;
             text-align: center;
-            padding: 40px 0;
+            padding: 60px 0;
+            color: var(--text-muted);
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>FunPayRa4xq Marketplace</h1>
+        <h1>FunPay Marketplace</h1>
+        <div class="rate-badge" id="rate-display">Курс TON: <span>Загрузка...</span></div>
     </header>
 
-    <section class="filters-panel">
-        <div class="filter-group">
-            <label for="filter-model">Model</label>
-            <select id="filter-model">
-                <option value="all">All Models</option>
-            </select>
+    <section class="controls-panel">
+        <div class="search-row">
+            <input type="text" id="search-input" placeholder="Поиск подарка по названию...">
+            <button class="btn-reset" id="reset-filters">Сбросить всё</button>
         </div>
-        <div class="filter-group">
-            <label for="filter-back">Back</label>
-            <select id="filter-back">
-                <option value="all">All Backs</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="filter-symbol">Symbol</label>
-            <select id="filter-symbol">
-                <option value="all">All Symbols</option>
-            </select>
+
+        <div class="filters-row">
+            <div class="filter-group">
+                <label for="f-collection">Collection</label>
+                <select id="f-collection"><option value="all">All Collections</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="f-model">Model</label>
+                <select id="f-model"><option value="all">All Models</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="f-back">Back</label>
+                <select id="f-back"><option value="all">All Backs</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="f-symbol">Symbol</label>
+                <select id="f-symbol"><option value="all">All Symbols</option></select>
+            </div>
+            <div class="filter-group price-slider-container">
+                <label>Макс. цена (Руб)</label>
+                <div class="price-labels">
+                    <span>до: <b id="slider-val">0</b> ₽</span>
+                </div>
+                <input type="range" id="f-price" min="0" max="2500" step="10">
+            </div>
         </div>
     </section>
 
-    <div class="stats" id="stats-counter">Загрузка информации...</div>
+    <div class="stats" id="counter-display">Найдено предметов: 0</div>
 
-    <main class="grid" id="catalog">
-        <div class="loading">Загрузка витрины предметов...</div>
+    <main class="grid" id="catalog-container">
+        <div class="loading">Загрузка витрины и обработка токенов...</div>
     </main>
 
     <script>
-        const FUNPAY_PROFILE = "https://funpay.com/users/13409860/"; 
-        const TON_RATE = 138; 
-        const MARKUP = 1.35;  
-        const MAX_PRICE_TON = 9.0; // Строгий лимит до 9 TON
+        // БАЗОВЫЕ КОНСТАНТЫ И ИНТЕГРАЦИЯ
+        const FUNPAY_SELLER_URL = "https://funpay.com/users/13409860/";
+        const MARKUP = 1.35; // Наценка 35%
+        const MAX_TON_LIMIT = 9.0; // Срезаем всё, что дороже 9 TON
 
-        // Интегрированные списки официальных атрибутов с Portals API
-        const portalsData = {
+        // ПОЛНАЯ СТАТИЧЕСКАЯ БАЗА АТРИБУТОВ С PORTALS API
+        const portalsSchema = {
+            collections: ["Telegram Gifts", "Halloween 2024", "New Year 2025", "Valentine's Day 2025", "Lunar New Year 2025"],
             models: [
                 "Instant Ramen", "Snake Box", "Xmas Stocking", "Lunar Snake", "Candy Cane", 
                 "Whip Cupcake", "Vice Cream", "Chill Flame", "Hypno Lollipop", "Holiday Drink", 
@@ -262,119 +384,195 @@
             symbols: ["Heart", "Star", "Diamond", "Club", "Spade", "Trophy", "None"]
         };
 
-        const catalog = document.getElementById('catalog');
-        const statsCounter = document.getElementById('stats-counter');
-        
-        const selectModel = document.getElementById('filter-model');
-        const selectBack = document.getElementById('filter-back');
-        const selectSymbol = document.getElementById('filter-symbol');
+        // НАБОР ДАННЫХ ДЛЯ ВИТРИНЫ (ИЗ ТВОИХ JSON И СКРИНШОТОВ ДО 9 TON)
+        const localMarketDataset = [
+            { id: 101, name: "Pool Float Blue Heart", collection: "Telegram Gifts", model: "Pool Float", back: "Blue", symbol: "Heart", price: 5.93, photo_url: "https://nft.fragment.com/gift/poolfloat-1.large.jpg" },
+            { id: 102, name: "Ice Cream Pink Star", collection: "Telegram Gifts", model: "Ice Cream", back: "Pink", symbol: "Star", price: 6.86, photo_url: "https://nft.fragment.com/gift/icecream-1.large.jpg" },
+            { id: 103, name: "Mood Pack Purple Diamond", collection: "Telegram Gifts", model: "Mood Pack", back: "Purple", symbol: "Diamond", price: 7.58, photo_url: "https://nft.fragment.com/gift/moodpack-1.large.jpg" },
+            { id: 104, name: "Instant Ramen Red Club", collection: "Telegram Gifts", model: "Instant Ramen", back: "Red", symbol: "Club", price: 4.20, photo_url: "https://nft.fragment.com/gift/ramen-1.large.jpg" },
+            { id: 105, name: "Snake Box Green Spade", collection: "Lunar New Year 2025", model: "Snake Box", back: "Green", symbol: "Spade", price: 3.15, photo_url: "https://nft.fragment.com/gift/snakebox-1.large.jpg" },
+            { id: 106, name: "Xmas Stocking Black Trophy", collection: "New Year 2025", model: "Xmas Stocking", back: "Black", symbol: "Trophy", price: 7.94, photo_url: "https://nft.fragment.com/gift/stocking-1.large.jpg" },
+            { id: 107, name: "Candy Cane Aqua Heart", collection: "New Year 2025", model: "Candy Cane", back: "Aqua", symbol: "Heart", price: 2.45, photo_url: "https://nft.fragment.com/gift/candycane-1.large.jpg" },
+            { id: 108, name: "Whip Cupcake Yellow Star", collection: "Telegram Gifts", model: "Whip Cupcake", back: "Yellow", symbol: "Star", price: 5.10, photo_url: "https://nft.fragment.com/gift/cupcake-1.large.jpg" },
+            { id: 109, name: "Chill Flame Blue None", collection: "Halloween 2024", model: "Chill Flame", back: "Blue", symbol: "None", price: 8.20, photo_url: "https://nft.fragment.com/gift/chillflame-1.large.jpg" },
+            { id: 110, name: "Valentine Box Pink Heart", collection: "Valentine's Day 2025", model: "Valentine Box", back: "Pink", symbol: "Heart", price: 6.50, photo_url: "https://nft.fragment.com/gift/valentine-1.large.jpg" }
+        ];
 
-        let allItems = []; 
+        // ДОМ-ЭЛЕМЕНТЫ
+        const catalogContainer = document.getElementById('catalog-container');
+        const rateDisplay = document.getElementById('rate-display').querySelector('span');
+        const counterDisplay = document.getElementById('counter-display');
+        const searchInput = document.getElementById('search-input');
+        const filterCollection = document.getElementById('f-collection');
+        const filterModel = document.getElementById('f-model');
+        const filterBack = document.getElementById('f-back');
+        const filterSymbol = document.getElementById('f-symbol');
+        const filterPrice = document.getElementById('f-price');
+        const sliderVal = document.getElementById('slider-val');
+        const btnReset = document.getElementById('reset-filters');
 
-        // Инициализация списков фильтров при старте страницы
-        function initFilterSelects() {
-            portalsData.models.sort().forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.toLowerCase();
-                opt.textContent = m;
-                selectModel.appendChild(opt);
-            });
-            portalsData.backs.sort().forEach(b => {
-                const opt = document.createElement('option');
-                opt.value = b.toLowerCase();
-                opt.textContent = b;
-                selectBack.appendChild(opt);
-            });
-            portalsData.symbols.sort().forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.toLowerCase();
-                opt.textContent = s;
-                selectSymbol.appendChild(opt);
-            });
-        }
+        let currentTonRate = 138; // Дефолтный fallback курс
+        let itemsList = [];
 
-        initFilterSelects();
+        // 1. ПОЛУЧЕНИЕ КУРСА С COINGECKO С КЭШИРОВАНИЕМ НА 1 ЧАС
+        async function fetchTonRate() {
+            const cacheKey = "ton_rate_rub";
+            const cacheTimeKey = "ton_rate_time";
+            const cachedRate = localStorage.getItem(cacheKey);
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+            const now = Date.now();
 
-        fetch('market_data.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка при загрузке JSON');
-                return response.json();
-            })
-            .then(data => {
-                if (!data.results || data.results.length === 0) {
-                    catalog.innerHTML = '<div class="loading">Нет доступных предметов в market_data.json</div>';
-                    return;
-                }
-
-                // Жесткий фильтр: оставляем на сайте только подарки со скринов (до 9 TON)
-                allItems = data.results.filter(item => parseFloat(item.price) <= MAX_PRICE_TON);
-                
-                renderCatalog(allItems);
-
-                [selectModel, selectBack, selectSymbol].forEach(select => {
-                    select.addEventListener('change', filterProducts);
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                catalog.innerHTML = '<div class="error">Не удалось загрузить витрину. Проверьте маркет-данные.</div>';
-            });
-
-        function renderCatalog(items) {
-            catalog.innerHTML = '';
-            statsCounter.textContent = `Найдено предметов: ${items.length}`;
-
-            if (items.length === 0) {
-                catalog.innerHTML = '<div class="loading">Нет предметов, соответствующих выбранным фильтрам.</div>';
+            if (cachedRate && cachedTime && (now - cachedTime < 60 * 60 * 1000)) {
+                currentTonRate = parseFloat(cachedRate);
+                rateDisplay.textContent = `${currentTonRate} ₽ (из кэша)`;
                 return;
             }
 
-            items.forEach(item => {
-                const originalPriceTON = parseFloat(item.price);
-                const finalPriceRUB = Math.round(originalPriceTON * TON_RATE * MARKUP);
+            try {
+                const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub");
+                if (!response.ok) throw new Error("CoinGecko Limit");
+                const data = await response.json();
+                currentTonRate = Math.ceil(data["the-open-network"].rub);
+                localStorage.setItem(cacheKey, currentTonRate);
+                localStorage.setItem(cacheTimeKey, now);
+                rateDisplay.textContent = `${currentTonRate} ₽`;
+            } catch (err) {
+                console.warn("Превышен лимит API CoinGecko. Переключение на базовый курс.");
+                rateDisplay.textContent = `${currentTonRate} ₽ (Индикативный)`;
+            }
+        }
+
+        // 2. СБОР И ИНИЦИАЛИЗАЦИЯ СЕЛЕКТОРОВ ФИЛЬТРАЦИИ
+        function populateFilterOptions() {
+            portalsSchema.collections.forEach(c => filterCollection.appendChild(new Option(c, c)));
+            portalsSchema.models.sort().forEach(m => filterModel.appendChild(new Option(m, m)));
+            portalsSchema.backs.sort().forEach(b => filterBack.appendChild(new Option(b, b)));
+            portalsSchema.symbols.sort().forEach(s => filterSymbol.appendChild(new Option(s, s)));
+        }
+
+        // 3. ЗАГРУЗКА И СЛИЯНИЕ ДАННЫХ ИЗ PORTALS MARKET
+        async function loadCatalogData() {
+            await fetchTonRate();
+            
+            try {
+                // Попытка динамического получения свежего файла данных
+                const res = await fetch('market_data.json');
+                if (res.ok) {
+                    const dynamicData = await res.json();
+                    if (dynamicData.results && dynamicData.results.length > 0) {
+                        itemsList = dynamicData.results;
+                    } else {
+                        itemsList = localMarketDataset;
+                    }
+                } else {
+                    itemsList = localMarketDataset;
+                }
+            } catch (e) {
+                itemsList = localMarketDataset;
+            }
+
+            // Фильтруем по ТЗ: строго до 9 TON
+            itemsList = itemsList.filter(item => parseFloat(item.price) <= MAX_TON_LIMIT);
+
+            // Настройка максимальной границы ползунка цен на основе курса
+            const maxCalculatedRub = Math.ceil(MAX_TON_LIMIT * currentTonRate * MARKUP);
+            filterPrice.max = maxCalculatedRub;
+            filterPrice.value = maxCalculatedRub;
+            sliderVal.textContent = maxCalculatedRub;
+
+            renderCatalog(itemsList);
+        }
+
+        // 4. ОТРИСОВКА КАРТОЧЕК ВИТРИНЫ
+        function renderCatalog(filteredItems) {
+            catalogContainer.innerHTML = '';
+            counterDisplay.textContent = `Найдено предметов: ${filteredItems.length}`;
+
+            if (filteredItems.length === 0) {
+                catalogContainer.innerHTML = '<div class="loading">Нет предметов, удовлетворяющих условиям поиска.</div>';
+                return;
+            }
+
+            filteredItems.forEach(item => {
+                const tonPrice = parseFloat(item.price);
+                // Формула: (TON * Курс) * 1.35 с округлением вверх до целого
+                const rubPrice = Math.ceil((tonPrice * currentTonRate) * MARKUP);
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="img-container">
+                    <div class="img-wrapper">
                         <img src="${item.photo_url}" alt="${item.name}" loading="lazy">
                     </div>
                     <div class="info">
-                        <div class="number">#${item.external_collection_number || 'NFT'}</div>
-                        <div class="name">${item.name}</div>
-                        <div class="price-container">
-                            <div class="price">${finalPriceRUB}</div>
-                            <div class="ton-price">Оригинал: ${originalPriceTON} TON</div>
+                        <div class="collection-tag">${item.collection || 'Telegram Gifts'}</div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="attributes-badges">
+                            <span class="badge">Model: ${item.model || 'NFT'}</span>
+                            <span class="badge">Back: ${item.back || 'None'}</span>
+                            <span class="badge">Symbol: ${item.symbol || 'None'}</span>
                         </div>
-                        <a href="${FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
+                        <div class="price-box">
+                            <div class="rub-price">${rubPrice.toLocaleString('ru-RU')} ₽</div>
+                            <div class="ton-price">Цена Portals: ${tonPrice} TON</div>
+                        </div>
+                        <a href="${FUNPAY_SELLER_URL}" target="_blank" class="btn-buy">Купить на FunPay</a>
                     </div>
                 `;
-                catalog.appendChild(card);
+                catalogContainer.appendChild(card);
             });
         }
 
-        // Продвинутый маппинг фильтрации по официальной базе Portals
-        function filterProducts() {
-            const chosenModel = selectModel.value;
-            const chosenBack = selectBack.value;
-            const chosenSymbol = selectSymbol.value;
+        // 5. РЕАКТИВНАЯ ФИЛЬТРАЦИЯ И СОРТИРОВКА
+        function applyFilters() {
+            const searchVal = searchInput.value.toLowerCase().trim();
+            const selColl = filterCollection.value;
+            const selModel = filterModel.value;
+            const selBack = filterBack.value;
+            const selSymbol = filterSymbol.value;
+            const maxPriceRub = parseInt(filterPrice.value);
 
-            const filtered = allItems.filter(item => {
-                const itemName = item.name.toLowerCase();
+            sliderVal.textContent = maxPriceRub;
+
+            const filtered = itemsList.filter(item => {
+                const rubPrice = Math.ceil((parseFloat(item.price) * currentTonRate) * MARKUP);
                 
-                // Проверка модели
-                const matchModel = (chosenModel === 'all' || itemName.includes(chosenModel));
-                // Проверка фона
-                const matchBack = (chosenBack === 'all' || itemName.includes(chosenBack));
-                // Проверка символа
-                const matchSymbol = (chosenSymbol === 'all' || itemName.includes(chosenSymbol));
+                const matchSearch = !searchVal || item.name.toLowerCase().includes(searchVal);
+                const matchColl = selColl === 'all' || item.collection === selColl;
+                const matchModel = selModel === 'all' || item.model === selModel;
+                const matchBack = selBack === 'all' || item.back === selBack;
+                const matchSymbol = selSymbol === 'all' || item.symbol === selSymbol;
+                const matchPrice = rubPrice <= maxPriceRub;
 
-                return matchModel && matchBack && matchSymbol;
+                return matchSearch && matchColl && matchModel && matchBack && matchSymbol && matchPrice;
             });
 
             renderCatalog(filtered);
         }
-    </script>
 
+        // 6. СБРОС ВСЕХ ПАРАМЕТРОВ
+        function resetAll() {
+            searchInput.value = '';
+            filterCollection.value = 'all';
+            filterModel.value = 'all';
+            filterBack.value = 'all';
+            filterSymbol.value = 'all';
+            filterPrice.value = filterPrice.max;
+            sliderVal.textContent = filterPrice.max;
+            renderCatalog(itemsList);
+        }
+
+        // ИВЕНТЫ
+        [filterCollection, filterModel, filterBack, filterSymbol, filterPrice].forEach(el => {
+            el.addEventListener('change', applyFilters);
+        });
+        filterPrice.addEventListener('input', () => sliderVal.textContent = filterPrice.value);
+        searchInput.addEventListener('input', applyFilters);
+        btnReset.addEventListener('click', resetAll);
+
+        // СТАРТ
+        populateFilterOptions();
+        loadCatalogData();
+    </script>
 </body>
 </html>
