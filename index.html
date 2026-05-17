@@ -6,13 +6,12 @@
     <title>Telegram Gifts Showcase</title>
     <style>
         :root {
-            --bg-main: #1c1212; /* Темный кастомный фон сайта */
-            --bg-panel: #261919;
-            --bg-input: #362525;
-            --accent: #f43f5e; /* Розовый неон для рамок */
+            --bg-main: #140d0d;
+            --bg-panel: #1f1414;
+            --bg-input: #2d1e1e;
+            --accent: #f29393;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --success: #4ade80;
         }
 
         * {
@@ -38,10 +37,9 @@
             gap: 25px;
         }
 
-        /* Панель фильтров */
         .filter-panel {
             background-color: var(--bg-panel);
-            border: 1px solid rgba(244, 63, 94, 0.2);
+            border: 1px solid rgba(242, 147, 147, 0.2);
             border-radius: 16px;
             padding: 20px;
             display: flex;
@@ -125,22 +123,21 @@
             color: var(--text-muted);
         }
 
-        /* Сетка каталога под стиль скрина */
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 20px;
         }
 
-        /* КАРТОЧКА 1 В 1 КАК НА СКРИНЕ */
+        /* КАРТОЧКА 1 В 1 */
         .card {
-            border: 4px solid #f29393; /* Светло-розовая толстая рамка */
+            border: 4px solid var(--accent);
             border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
-            aspect-ratio: 1 / 1.25; /* Пропорции карточки */
+            aspect-ratio: 1 / 1.25;
             text-decoration: none;
             color: inherit;
             transition: transform 0.2s;
@@ -150,7 +147,6 @@
             transform: scale(1.02);
         }
 
-        /* Номер подарка в правом верхнем углу */
         .gift-number {
             position: absolute;
             top: 10px;
@@ -165,7 +161,6 @@
             z-index: 2;
         }
 
-        /* Контейнер картинки с узорчатым/цветным фоном */
         .img-container {
             width: 100%;
             height: 65%;
@@ -176,16 +171,15 @@
         }
 
         .img-container img {
-            max-width: 75%;
-            max-height: 75%;
+            max-width: 70%;
+            max-height: 70%;
             object-fit: contain;
             z-index: 1;
         }
 
-        /* Тёмная подложка с инфой внизу */
         .card-content {
             height: 35%;
-            background-color: #18181c; /* Матово-черный блок */
+            background-color: #18181c;
             padding: 12px 15px;
             display: flex;
             flex-direction: column;
@@ -214,7 +208,7 @@
         .price-row {
             font-size: 1.25rem;
             font-weight: bold;
-            color: #f29393; /* Розовый цвет цены как на скрине */
+            color: var(--accent);
             margin-top: auto;
         }
 
@@ -260,27 +254,89 @@
     <script>
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
-            MIN_PRICE: 600,       // Твоя минималка
-            MARKUP_FACTOR: 1.35,  // 35% наценка
-            TON_RATE: 138.5       // Курс TON
+            MIN_PRICE: 600,       
+            MARKUP_FACTOR: 1.35,  
+            TON_RATE: 138.5       
         };
 
-        // База данных с номерами, моделями, фонами и цветами карточек из оригинального пула
+        // ПОЛНЫЙ список всех товаров из твоих скриншотов
         const LOCAL_DATA = [
-            { id: "instant_ramen", name: "Instant Ramen", number: "215984", model: "Ratatouille", bgName: "Coral Red", bgColor: "#b45309", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "instant_ramen", name: "Instant Ramen", number: "117378", model: "Ratatouille", bgName: "Cappuccino", bgColor: "#78350f", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "instant_ramen", name: "Instant Ramen", number: "113655", model: "Cable Mess", bgName: "Satin Gold", bgColor: "#6b5a32", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "instant_ramen", name: "Instant Ramen", number: "71247", model: "Ratatouille", bgName: "Cobalt Blue", bgColor: "#1e3a8a", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "instant_ramen", name: "Instant Ramen", number: "296021", model: "Ratatouille", bgName: "Battleship Grey", bgColor: "#4b5563", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "instant_ramen", name: "Instant Ramen", number: "22549", model: "Ratatouille", bgName: "Pure Gold", bgColor: "#854d0e", tonPrice: 1.67, assetId: "9139335624707936111" },
-            { id: "xmas_stocking", name: "Xmas Stocking", number: "86160", model: "Lavender", bgName: "Burnt Sienna", bgColor: "#7c2d12", tonPrice: 1.67, assetId: "5423545163351912255" },
-            { id: "snake_box", name: "Snake Box", number: "173536", model: "Red Dash", bgName: "Amber", bgColor: "#92400e", tonPrice: 1.67, assetId: "5341355421523412532" },
-            { id: "lunar_snake", name: "Lunar Snake", number: "196301", model: "Classic", bgName: "Crimson", bgColor: "#991b1b", tonPrice: 1.68, assetId: "5213421523125213511" },
-            { id: "candy_cane", name: "Candy Cane", number: "220912", model: "Sweet Mint", bgName: "Emerald", bgColor: "#065f46", tonPrice: 1.73, assetId: "5412512521321523111" },
-            { id: "whip_cupcake", name: "Whip Cupcake", number: "274205", model: "Creamy", bgName: "Violet", bgColor: "#5b21b6", tonPrice: 1.74, assetId: "5125213125213512311" },
-            { id: "pet_snake", name: "Pet Snake", number: "184511", model: "Snake Dance", bgName: "Indigo", bgColor: "#3730a3", tonPrice: 1.99, assetId: "5125125123215123512" },
-            { id: "jester_hat", name: "Jester Hat", number: "140112", model: "Circus", bgName: "Cyan", bgColor: "#155e75", tonPrice: 1.98, assetId: "5125125132151235212" },
-            { id: "top_hat", name: "Top Hat", number: "34301", model: "Gentleman", bgName: "Charcoal", bgColor: "#1f2937", tonPrice: 7.88, assetId: "5123512512312512351" }
+            { id: "instant_ramen", name: "Instant Ramen", number: "215984", model: "Ratatouille", bgName: "Coral Red", bgColor: "#b45309", tonPrice: 1.67 },
+            { id: "instant_ramen", name: "Instant Ramen", number: "117378", model: "Ratatouille", bgName: "Cappuccino", bgColor: "#78350f", tonPrice: 1.67 },
+            { id: "instant_ramen", name: "Instant Ramen", number: "113655", model: "Cable Mess", bgName: "Satin Gold", bgColor: "#6b5a32", tonPrice: 1.67 },
+            { id: "instant_ramen", name: "Instant Ramen", number: "71247", model: "Ratatouille", bgName: "Cobalt Blue", bgColor: "#1e3a8a", tonPrice: 1.67 },
+            { id: "instant_ramen", name: "Instant Ramen", number: "296021", model: "Ratatouille", bgName: "Battleship Grey", bgColor: "#4b5563", tonPrice: 1.67 },
+            { id: "instant_ramen", name: "Instant Ramen", number: "22549", model: "Ratatouille", bgName: "Pure Gold", bgColor: "#854d0e", tonPrice: 1.67 },
+            { id: "snake_box", name: "Snake Box", number: "173536", model: "Red Dash", bgName: "Amber", bgColor: "#92400e", tonPrice: 1.67 },
+            { id: "xmas_stocking", name: "Xmas Stocking", number: "86160", model: "Lavender", bgName: "Burnt Sienna", bgColor: "#7c2d12", tonPrice: 1.67 },
+            { id: "lunar_snake", name: "Lunar Snake", number: "10943", model: "Classic", bgName: "Crimson", bgColor: "#991b1b", tonPrice: 1.68 },
+            { id: "candy_cane", name: "Candy Cane", number: "44123", model: "Sweet Mint", bgName: "Emerald", bgColor: "#065f46", tonPrice: 1.73 },
+            { id: "whip_cupcake", name: "Whip Cupcake", number: "98542", model: "Creamy", bgName: "Violet", bgColor: "#5b21b6", tonPrice: 1.74 },
+            { id: "vice_cream", name: "Vice Cream", number: "12351", model: "Soft Serve", bgName: "Mint", bgColor: "#115e59", tonPrice: 1.78 },
+            { id: "chill_flame", name: "Chill Flame", number: "65123", model: "Neon", bgName: "Darkness", bgColor: "#1e1b4b", tonPrice: 1.83 },
+            { id: "hypno_lollipop", name: "Hypno Lollipop", number: "74321", model: "Spiral", bgName: "Psycho", bgColor: "#4c1d95", tonPrice: 1.84 },
+            { id: "holiday_drink", name: "Holiday Drink", number: "32154", model: "Spiced", bgName: "Winter", bgColor: "#831843", tonPrice: 1.88 },
+            { id: "ice_cream", name: "Ice Cream", number: "15432", model: "Vanilla", bgName: "Berry", bgColor: "#9d174d", tonPrice: 1.88 },
+            { id: "big_year", name: "Big Year", number: "88412", model: "2025", bgName: "Confetti", bgColor: "#14532d", tonPrice: 1.91 },
+            { id: "star_notepad", name: "Star Notepad", number: "23154", model: "Leather", bgName: "Cosmic", bgColor: "#0f172a", tonPrice: 1.95 },
+            { id: "jester_hat", name: "Jester Hat", number: "140112", model: "Circus", bgName: "Cyan", bgColor: "#155e75", tonPrice: 1.98 },
+            { id: "pet_snake", name: "Pet Snake", number: "184511", model: "Snake Dance", bgName: "Indigo", bgColor: "#3730a3", tonPrice: 1.99 },
+            { id: "easter_egg", name: "Easter Egg", number: "54213", model: "Painted", bgName: "Spring", bgColor: "#166534", tonPrice: 2.00 },
+            { id: "party_sparkler", name: "Party Sparkler", number: "65412", model: "Glow", bgName: "Midnight", bgColor: "#030712", tonPrice: 2.00 },
+            { id: "fresh_socks", name: "Fresh Socks", number: "43215", model: "Striped", bgName: "Warmth", bgColor: "#7c2d12", tonPrice: 2.01 },
+            { id: "tama_gadget", name: "Tama Gadget", number: "87541", model: "Retro", bgName: "Cyber", bgColor: "#581c87", tonPrice: 2.08 },
+            { id: "winter_wreath", name: "Winter Wreath", number: "19432", model: "Pine", bgName: "Forest", bgColor: "#064e3b", tonPrice: 2.09 },
+            { id: "hex_pot", name: "Hex Pot", number: "99431", model: "Brew", bgName: "Magic", bgColor: "#4a044e", tonPrice: 2.11 },
+            { id: "happy_brownie", name: "Happy Brownie", number: "76541", model: "Choco", bgName: "Sweet", bgColor: "#451a03", tonPrice: 2.14 },
+            { id: "pool_float", name: "Pool Float", number: "23145", model: "Flamingo", bgName: "Water", bgColor: "#0369a1", tonPrice: 2.16 },
+            { id: "ginger_cookie", name: "Ginger Cookie", number: "84321", model: "Man", bgName: "Bakery", bgColor: "#78350f", tonPrice: 2.29 },
+            { id: "stellar_rocket", name: "Stellar Rocket", number: "12543", model: "Apollo", bgName: "Orbit", bgColor: "#1e293b", tonPrice: 2.29 },
+            { id: "b_day_candle", name: "B-Day Candle", number: "95412", model: "Cake", bgName: "Party", bgColor: "#1e1b4b", tonPrice: 2.43 },
+            { id: "santa_hat", name: "Santa Hat", number: "43125", model: "Claus", bgName: "Red", bgColor: "#7f1d1d", tonPrice: 2.44 },
+            { id: "lol_pop", name: "Lol Pop", number: "15423", model: "Glaze", bgName: "Candy", bgColor: "#701a75", tonPrice: 2.46 },
+            { id: "spiced_wine", name: "Spiced Wine", number: "65432", model: "Glint", bgName: "Cozy", bgColor: "#4c0519", tonPrice: 2.49 },
+            { id: "mood_pack", name: "Mood Pack", number: "32145", model: "Emoji", bgName: "Yellow", bgColor: "#713f12", tonPrice: 2.54 },
+            { id: "clover_pin", name: "Clover Pin", number: "95431", model: "Lucky", bgName: "Grass", bgColor: "#064e3b", tonPrice: 2.58 },
+            { id: "pretty_posy", name: "Pretty Posy", number: "12345", model: "Flowers", bgName: "Garden", bgColor: "#15803d", tonPrice: 2.62 },
+            { id: "mousse_cake", name: "Mousse Cake", number: "74125", model: "Glaze", bgName: "Desert", bgColor: "#500724", tonPrice: 2.65 },
+            { id: "restless_jar", name: "Restless Jar", number: "85214", model: "Souls", bgName: "Eerie", bgColor: "#311042", tonPrice: 2.65 },
+            { id: "bow_tie", name: "Bow Tie", number: "96321", model: "Classic", bgName: "Tuxedo", bgColor:  "#111827", tonPrice: 2.70 },
+            { id: "input_key", name: "Input Key", number: "45213", model: "Cyber", bgName: "Matrix", bgColor: "#022c22", tonPrice: 2.77 },
+            { id: "cookie_heart", name: "Cookie Heart", number: "85236", model: "Love", bgName: "Pink", bgColor: "#9d174d", tonPrice: 2.78 },
+            { id: "jack_in_the_box", name: "Jack-in-the-Box", number: "36925", model: "Surprise", bgName: "Toy", bgColor: "#1e3a8a", tonPrice: 2.78 },
+            { id: "timeless_book", name: "Timeless Book", number: "14785", model: "Ancient", bgName: "Library", bgColor: "#451a03", tonPrice: 2.78 },
+            { id: "victory_medal", name: "Victory Medal", number: "25814", model: "Gold", bgName: "Champ", bgColor: "#854d0e", tonPrice: 2.79 },
+            { id: "homemade_cake", name: "Homemade Cake", number: "36521", model: "Sweet", bgName: "Kitchen", bgColor: "#5c1d24", tonPrice: 2.84 },
+            { id: "money_pot", name: "Money Pot", number: "98741", model: "Gold", bgName: "Rich", bgColor: "#713f12", tonPrice: 2.85 },
+            { id: "light_sword", name: "Light Sword", number: "14523", model: "Jedi", bgName: "Space", bgColor: "#06283d", tonPrice: 2.96 },
+            { id: "snow_mittens", name: "Snow Mittens", number: "32147", model: "Fluffy", bgName: "Ice", bgColor: "#104352", tonPrice: 2.98 },
+            { id: "snoop_dogg", name: "Snoop Dogg", number: "42153", model: "Legend", bgName: "WestCoast", bgColor: "#1e1b4b", tonPrice: 3.04 },
+            { id: "lush_bouquet", name: "Lush Bouquet", number: "75312", model: "Luxury", bgName: "Rose", bgColor: "#881337", tonPrice: 3.10 },
+            { id: "moon_pendant", name: "Moon Pendant", number: "95135", model: "Silver", bgName: "Night", bgColor: "#0f172a", tonPrice: 3.16 },
+            { id: "snow_globe", name: "Snow Globe", number: "85213", model: "Magic", bgName: "Freeze", bgColor: "#134e5e", tonPrice: 3.25 },
+            { id: "spring_basket", name: "Spring Basket", number: "74123", model: "Easter", bgName: "Green", bgColor: "#14532d", tonPrice: 3.35 },
+            { id: "swag_bag", name: "Swag Bag", number: "96385", model: "Money", bgName: "Dollar", bgColor: "#064e3b", tonPrice: 3.35 },
+            { id: "faith_amulet", name: "Faith Amulet", number: "15935", model: "Relic", bgName: "Glow", bgColor: "#4a044e", tonPrice: 3.36 },
+            { id: "witch_hat", name: "Witch Hat", number: "34301", model: "Sorcerer", bgName: "Magic", bgColor: "#2e1065", tonPrice: 3.48 },
+            { id: "eternal_candle", name: "Eternal Candle", number: "75395", model: "Flame", bgName: "Gothic", bgColor: "#450a0a", tonPrice: 3.49 },
+            { id: "spy_agaric", name: "Spy Agaric", number: "12395", model: "Mushroom", bgName: "Poison", bgColor: "#6b21a8", tonPrice: 3.49 },
+            { id: "desk_calendar", name: "Desk Calendar", number: "85274", model: "Office", bgName: "Schedule", bgColor: "#334155", tonPrice: 3.70 },
+            { id: "evil_eye", name: "Evil Eye", number: "96314", model: "Amulet", bgName: "Protect", bgColor: "#172554", tonPrice: 4.08 },
+            { id: "bunny_muffin", name: "Bunny Muffin", number: "75321", model: "Sweet", bgName: "Bakery", bgColor: "#4d0e3b", tonPrice: 4.49 },
+            { id: "jolly_chimp", name: "Jolly Chimp", number: "14852", model: "Toy", bgName: "Vintage", bgColor: "#451a03", tonPrice: 4.61 },
+            { id: "joyful_bundle", name: "Joyful Bundle", number: "96325", model: "Gift Pack", bgName: "Bright", bgColor: "#1e3a8a", tonPrice: 4.69 },
+            { id: "jelly_bunny", name: "Jelly Bunny", number: "15948", model: "Sweet", bgName: "Gelatin", bgColor: "#065f46", tonPrice: 5.00 },
+            { id: "jingle_bells", name: "Jingle Bells", number: "74159", model: "Brass", bgName: "Xmas", bgColor: "#7c2d12", tonPrice: 5.48 },
+            { id: "hanging_star", name: "Hanging Star", number: "85296", model: "Gold", bgName: "Shine", bgColor: "#854d0e", tonPrice: 5.88 },
+            { id: "sleigh_bell", name: "Sleigh Bell", number: "36952", model: "Silver", bgName: "Chime", bgColor: "#334155", tonPrice: 6.07 },
+            { id: "berry_box", name: "Berry Box", number: "14725", model: "Fresh", bgName: "Fruit", bgColor: "#9d174d", tonPrice: 6.40 },
+            { id: "love_candle", name: "Love Candle", number: "85231", model: "Heart", bgName: "Aroma", bgColor: "#881337", tonPrice: 6.50 },
+            { id: "valentine_box", name: "Valentine Box", number: "96357", model: "Gift", bgName: "Romantic", bgColor: "#701a75", tonPrice: 6.55 },
+            { id: "sakura_flower", name: "Sakura Flower", number: "14258", model: "Bloom", bgName: "Japan", bgColor: "#4d1234", tonPrice: 7.36 },
+            { id: "flying_broom", name: "Flying Broom", number: "75369", model: "Nimbus", bgName: "Witchcraft", bgColor: "#2d1a4a", tonPrice: 7.59 },
+            { id: "crystal_ball", name: "Crystal Ball", number: "85247", model: "Oracle", bgName: "Future", bgColor: "#1e1b4b", tonPrice: 7.61 },
+            { id: "top_hat", name: "Top Hat", number: "34302", model: "Gentleman", bgName: "Charcoal", bgColor: "#1f2937", tonPrice: 7.88 },
+            { id: "record_player", name: "Record Player", number: "96341", model: "Vinyl", bgName: "Retro", bgColor: "#3f2c12", tonPrice: 7.94 }
         ];
 
         let APP_STATE = { items: LOCAL_DATA };
@@ -298,11 +354,28 @@
             return calculated < CONFIG.MIN_PRICE ? CONFIG.MIN_PRICE : calculated;
         }
 
+        // Хэш-функция для генерации фонового цвета, если он не задан в базе
+        function getFallbackBgColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            let color = '#';
+            for (let i = 0; i < 3; i++) {
+                let value = (hash >> (i * 8)) & 0xFF;
+                // Сдвигаем в темные тона, чтобы подходило под стиль
+                value = Math.floor(value * 0.4); 
+                color += ('00' + value.toString(16)).substr(-2);
+            }
+            return color;
+        }
+
         function initApp() {
             const prices = APP_STATE.items.map(item => calculateFinalRubPrice(item.tonPrice));
-            domPriceRange.max = Math.max(...prices);
-            domPriceRange.value = Math.max(...prices);
-            domPriceLimitVal.textContent = Math.max(...prices).toLocaleString('ru-RU');
+            const maxPrice = Math.max(...prices);
+            domPriceRange.max = maxPrice;
+            domPriceRange.value = maxPrice;
+            domPriceLimitVal.textContent = maxPrice.toLocaleString('ru-RU');
 
             executeFiltering();
 
@@ -313,7 +386,7 @@
             domReset.addEventListener('click', () => {
                 domSearch.value = '';
                 domPriceRange.value = domPriceRange.max;
-                domPriceLimitVal.textContent = domPriceRange.max;
+                domPriceLimitVal.textContent = parseInt(domPriceRange.max).toLocaleString('ru-RU');
                 domSort.value = 'asc';
                 executeFiltering();
             });
@@ -350,8 +423,9 @@
             dataset.forEach(item => {
                 const finalPrice = calculateFinalRubPrice(item.tonPrice);
                 
-                // Стабильные статические изображения из официального репозитория Telegram assets
-                const imgUrl = `https://raw.githubusercontent.com/telegramdesktop/tdesktop/master/Telegram/Resources/tgclicks/gifts/${item.id}.png`;
+                // Исправленный стабильный URL официальных картинок Telegram Gifts
+                const imgUrl = `https://github.com/telegramdesktop/tdesktop/raw/master/Telegram/Resources/tgclicks/gifts/${item.id}.png`;
+                const cardBg = item.bgColor || getFallbackBgColor(item.id);
 
                 const cardNode = document.createElement('a');
                 cardNode.href = CONFIG.FUNPAY_PROFILE;
@@ -359,16 +433,16 @@
                 cardNode.className = 'card';
                 
                 cardNode.innerHTML = `
-                    <div class="gift-number">#${item.number}</div>
-                    <div class="img-container" style="background-color: ${item.bgColor || '#2d1a1a'}">
+                    <div class="gift-number">#${item.number || '00000'}</div>
+                    <div class="img-container" style="background-color: ${cardBg}">
                         <img src="${imgUrl}" alt="${item.name}" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/portals-to/assets/main/items/${item.id}/image.png';">
                     </div>
                     <div class="card-content">
                         <div>
                             <div class="item-title">${item.name}</div>
                             <div class="item-details">
-                                <div>Модель: ${item.model}</div>
-                                <div>Фон: ${item.bgName}</div>
+                                <div>Модель: ${item.model || 'Standard'}</div>
+                                <div>Фон: ${item.bgName || 'Default'}</div>
                             </div>
                         </div>
                         <div class="price-row">${finalPrice.toLocaleString('ru-RU')} ₽</div>
