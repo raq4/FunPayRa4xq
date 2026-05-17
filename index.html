@@ -170,10 +170,10 @@
 
     <script>
         // ================= НАСТРОЙКИ МАГАЗИНА ================= //
-        const FUNPAY_PROFILE = "https://funpay.com/users/ТВОЙ_АЙДИ/"; // <--- ВСТАВЬ ССЫЛКУ НА СВОЙ ПРОФИЛЬ!
-        const TON_RATE = 650; // <--- УКАЖИ АКТУАЛЬНЫЙ КУРС TON К РУБЛЮ!
-        const MARKUP = 1.35;  // Наценка 35% (1 = 0%, 1.35 = 35%)
-        const MAX_PRICE_TON = 8; // <--- МАКСИМАЛЬНАЯ ЦЕНА В TON ДЛЯ ОТОБРАЖЕНИЯ НА САЙТЕ
+        const FUNPAY_PROFILE = "https://funpay.com/users/13409860/"; 
+        const TON_RATE = 138; // <--- Реальный курс с Bitget на сегодня
+        const MARKUP = 1.35;  // Твоя наценка 35%
+        const MAX_PRICE_TON = 8; // Скрываем всё, что дороже 8 TON
         // ====================================================== //
 
         const catalog = document.getElementById('catalog');
@@ -191,21 +191,17 @@
                     return;
                 }
 
-                // Счетчик добавленных товаров
                 let addedItemsCount = 0;
 
                 data.results.forEach(item => {
                     const originalPriceTON = parseFloat(item.price);
                     
-                    // ФИЛЬТР: Пропускаем предмет, если он дороже 8 TON
                     if (originalPriceTON > MAX_PRICE_TON) {
-                        return; // Завершаем текущий шаг цикла и идем к следующему товару
+                        return; 
                     }
 
-                    // Если предмет прошел фильтр, увеличиваем счетчик
                     addedItemsCount++;
-
-                    // Математика цены
+                    // Математика: TON * 138 * 1.35
                     const finalPriceRUB = Math.round(originalPriceTON * TON_RATE * MARKUP);
 
                     const card = document.createElement('div');
@@ -227,7 +223,6 @@
                     catalog.appendChild(card);
                 });
 
-                // Если после фильтрации не осталось ни одного товара
                 if (addedItemsCount === 0) {
                     catalog.innerHTML = '<div class="loading">Все найденные подарки дороже 8 TON.</div>';
                 }
