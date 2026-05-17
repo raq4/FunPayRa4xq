@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portals Marketplace — FunPay Showcase</title>
+    <title>Portals Showcase — Авто-подключение</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -25,7 +25,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
             padding: 40px 20px;
@@ -75,7 +75,6 @@
             color: var(--success);
         }
 
-        /* ПАНЕЛЬ УПРАВЛЕНИЯ ФИЛЬТРАМИ */
         .filter-panel {
             background-color: var(--bg-card);
             border: 1px solid var(--border);
@@ -184,7 +183,6 @@
             color: var(--text-muted);
         }
 
-        /* АДАПТИВНАЯ СЕТКА КАТАЛОГА */
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -289,7 +287,6 @@
             background-color: var(--accent-hover);
         }
 
-        /* ИНДИКАТОРЫ СОСТОЯНИЙ */
         .state-container {
             grid-column: 1 / -1;
             text-align: center;
@@ -344,28 +341,22 @@
             </div>
         </section>
 
-        <div class="status-text" id="counter-text">Инициализация потоков данных...</div>
+        <div class="status-text" id="counter-text">Подключение к защищенным шлюзам Portals API...</div>
 
         <main class="catalog-grid" id="catalog-view">
-            <div class="state-container">Выполняется защищенный запрос к API Portals...</div>
+            <div class="state-container">Пробиваем CORS-защиту, ожидайте ответа...</div>
         </main>
     </div>
 
     <script>
-        /**
-         * АРХИТЕКТУРНАЯ КОНФИГУРАЦИЯ СИСТЕМЫ
-         */
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
             MARKUP_FACTOR: 1.35,
-            // Если браузер блокирует запросы из-за CORS policies, измените значение на true
-            USE_CORS_PROXY: false, 
-            PROXY_URL: "https://cors-anywhere.herokuapp.com/",
-            API_PORTALS: "https://api.portals.to/v1/collections?include=items",
-            API_COINGECKO: "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub"
+            // Прямой шлюз через автоматический corsproxy.io без ограничений
+            API_PORTALS: "https://corsproxy.io/?https://api.portals.to/v1/collections?include=items",
+            API_COINGECKO: "https://corsproxy.io/?https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub"
         };
 
-        // Глобальный State менеджер приложения
         let APP_STATE = {
             tonToRubRate: 0,
             rawItems: [],
@@ -373,7 +364,6 @@
             maxCalculatedPrice: 0
         };
 
-        // DOM Кэш-элементы
         const domCatalog = document.getElementById('catalog-view');
         const domRate = document.getElementById('ton-rate-val');
         const domCounter = document.getElementById('counter-text');
@@ -383,40 +373,35 @@
         const domPriceLimitVal = document.getElementById('price-limit-val');
         const domReset = document.getElementById('btn-reset-all');
 
-        /**
-         * ИНИЦИАЛИЗАЦИЯ И ПОЛУЧЕНИЕ ДАННЫХ
-         */
         async function runPipeline() {
             try {
-                // 1. Получение актуального курса валют
-                const coingeckoUrl = CONFIG.USE_CORS_PROXY ? CONFIG.PROXY_URL + CONFIG.API_COINGECKO : CONFIG.API_COINGECKO;
-                const rateResponse = await fetch(coingeckoUrl);
-                if (!rateResponse.ok) throw new Error("Не удалось получить котировки валют от CoinGecko API.");
+                // 1. Сбор котировок TON/RUB
+                const rateResponse = await fetch(CONFIG.API_COINGECKO);
+                if (!rateResponse.ok) throw new Error("Удаленный сервер CoinGecko отклонил прокси-запрос.");
                 const rateData = await rateResponse.json();
-                APP_STATE.tonToRubRate = parseFloat(rateData["the-open-network"].rub);
+                APP_STATE.tonToRubRate = Math.ceil(parseFloat(rateData["the-open-network"].rub));
                 domRate.textContent = `${APP_STATE.tonToRubRate.toLocaleString('ru-RU')} ₽`;
 
-                // 2. Получение массива токенов
-                const portalsUrl = CONFIG.USE_CORS_PROXY ? CONFIG.PROXY_URL + CONFIG.API_PORTALS : CONFIG.API_PORTALS;
-                const portalsResponse = await fetch(portalsUrl);
-                if (!portalsResponse.ok) throw new Error("Удаленный сервер Portals API отклонил запрос или недоступен.");
+                // 2. Сбор токенов из Portals
+                const portalsResponse = await fetch(CONFIG.API_PORTALS);
+                if (!portalsResponse.ok) throw new Error("Сервер Portals API отклонил прокси-запрос.");
                 const portalsData = await portalsResponse.json();
 
-                // 3. Высокоточный реляционный парсинг структуры JSON
+                // 3. Вызов глубокого нормализатора JSON структуры
                 normalizePortalsData(portalsData);
 
                 if (APP_STATE.rawItems.length === 0) {
-                    displaySystemError("API вернул пустой массив данных или структура изменилась.");
+                    displaySystemError("API ответил успешно, но не передал массив предметов (items).");
                     return;
                 }
 
-                // 4. Расчет крайних точек диапазона цен для калибровки ползунка
+                // 4. Настройка ползунка цен
                 calibratePriceSlider();
 
-                // 5. Первичный запуск рендеринга
+                // 5. Отрисовка
                 executeFiltering();
 
-                // Навешивание обработчиков событий (интерактив)
+                // Слушатели событий
                 domSearch.addEventListener('input', executeFiltering);
                 domType.addEventListener('change', executeFiltering);
                 domPriceRange.addEventListener('input', handleSliderMovement);
@@ -424,44 +409,33 @@
                 domReset.addEventListener('click', clearFormFilters);
 
             } catch (error) {
-                console.error("Critical System Error:", error);
+                console.error("Critical Failure:", error);
                 displaySystemError(error.message);
             }
         }
 
-        /**
-         * УМНЫЙ МАППИНГ И НОРМАЛИЗАЦИЯ ДАННЫХ ИЗ API
-         */
         function normalizePortalsData(payload) {
             let extractedCollections = [];
             
-            // Проверка различных вариантов структуры ответа API
-            if (Array.isArray(payload)) {
-                extractedCollections = payload;
-            } else if (payload.data && Array.isArray(payload.data)) {
-                extractedCollections = payload.data;
-            } else if (payload.collections && Array.isArray(payload.collections)) {
-                extractedCollections = payload.collections;
-            } else {
-                extractedCollections = [payload];
-            }
+            if (Array.isArray(payload)) extractedCollections = payload;
+            else if (payload.data && Array.isArray(payload.data)) extractedCollections = payload.data;
+            else if (payload.collections && Array.isArray(payload.collections)) extractedCollections = payload.collections;
+            else extractedCollections = [payload];
 
             let temporaryContainer = [];
 
             extractedCollections.forEach(collection => {
+                if (!collection) return;
                 const searchPool = collection.items || collection.cards || collection.nfts || [];
                 if (Array.isArray(searchPool)) {
                     searchPool.forEach(item => {
-                        // Поиск валидной цены внутри структуры объекта
                         let extractedPrice = 0;
                         if (item.price) extractedPrice = item.price;
                         else if (item.floorPrice) extractedPrice = item.floorPrice;
                         else if (item.listing && item.listing.price) extractedPrice = item.listing.price;
 
-                        // Поиск ссылки на медиа-ресурс
                         let extractedImage = item.image || item.imageUrl || item.image_url || item.photo_url || "";
 
-                        // Вычисление типа предмета на основе внутренних свойств или названия
                         let calculatedType = "gift";
                         if (item.type) {
                             calculatedType = item.type.toLowerCase();
@@ -488,9 +462,6 @@
             APP_STATE.rawItems = temporaryContainer;
         }
 
-        /**
-         * АВТОМАТИЧЕСКАЯ КАЛИБРОВКА ПОЛЗУНКА ЦЕН
-         */
         function calibratePriceSlider() {
             const calculatedPrices = APP_STATE.rawItems.map(item => 
                 Math.ceil((item.tonPrice * APP_STATE.tonToRubRate) * CONFIG.MARKUP_FACTOR)
@@ -509,9 +480,6 @@
             domPriceLimitVal.textContent = parseInt(domPriceRange.value).toLocaleString('ru-RU');
         }
 
-        /**
-         * КЛЮЧЕВАЯ ЛОГИКА ФИЛЬТРАЦИИ И ВЫВОДА В DOM
-         */
         function executeFiltering() {
             const query = domSearch.value.toLowerCase().trim();
             const selectedType = domType.value;
@@ -530,9 +498,6 @@
             renderShowcaseView(filteredDataSet);
         }
 
-        /**
-         * СБОРКА И ОТРИСОВКА КАРТОЧЕК В ИНТЕРФЕЙСЕ
-         */
         function renderShowcaseView(dataset) {
             domCatalog.innerHTML = '';
             domCounter.textContent = `Найдено предметов в каталоге: ${dataset.length}`;
@@ -540,7 +505,7 @@
             if (dataset.length === 0) {
                 domCatalog.innerHTML = `
                     <div class="state-container">
-                        Нет предметов, соответствующих заданным критериям фильтрации.
+                        Нет предметов, соответствующих критериям фильтра.
                     </div>`;
                 return;
             }
@@ -568,9 +533,6 @@
             });
         }
 
-        /**
-         * СБРОС И ОЧИСТКА СОСТОЯНИЙ
-         */
         function clearFormFilters() {
             domSearch.value = '';
             domType.value = 'all';
@@ -579,25 +541,21 @@
             executeFiltering();
         }
 
-        /**
-         * ОТБРАКОВКА И ОБРАБОТКА ОШИБОК
-         */
         function displaySystemError(message) {
             domCatalog.innerHTML = `
-                <div class="state-container grid-column: 1/-1;">
+                <div class="state-container">
                     <div class="state-error">
-                        <p style="margin-bottom: 10px;">🛑 КРИТИЧЕСКИЙ СБОЙ ПРИ ИНТЕГРАЦИИ API:</p>
+                        <p style="margin-bottom: 10px; font-weight: bold;">🛑 СБОЙ ПРИ ЗАГРУЗКЕ АКТУАЛЬНЫХ ДАННЫХ API:</p>
                         <p style="font-size: 0.95rem; color: var(--text-main); font-family: monospace;">${message}</p>
                         <p style="font-size: 0.85rem; margin-top: 15px; color: var(--text-muted);">
-                            Если проблема вызвана блокировкой CORS, откройте код index.html и переключите <span style="color:var(--accent)">USE_CORS_PROXY: true</span> в объекте конфигурации CONFIG.
+                            Проверьте интернет-соединение или повторите попытку позже. Локальная сессия была отклонена удаленным узлом.
                         </p>
                     </div>
                 </div>`;
-            domCounter.textContent = "Ошибка загрузки данных.";
+            domCounter.textContent = "Ошибка интеграции.";
             domRate.textContent = "Н/Д";
         }
 
-        // Запуск конвейера при полной загрузке документа
         document.addEventListener("DOMContentLoaded", runPipeline);
     </script>
 </body>
