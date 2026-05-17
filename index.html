@@ -60,20 +60,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .rate-badge {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .rate-badge span {
-            color: var(--success);
-        }
-
         .filter-panel {
             background-color: var(--bg-card);
             border: 1px solid var(--border);
@@ -213,19 +199,14 @@
             align-items: center;
         }
 
-        .img-container img, .img-container svg {
+        .img-container img {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 24px;
-        }
-
-        .img-container svg {
-            fill: var(--accent);
-            opacity: 0.8;
+            padding: 16px;
         }
 
         .card-content {
@@ -270,12 +251,6 @@
             color: var(--success);
         }
 
-        .price-ton {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
         .btn-buy {
             display: block;
             width: 100%;
@@ -309,7 +284,6 @@
     <div class="container">
         <header>
             <h1>Portals Showcase</h1>
-            <div class="rate-badge">Курс TON (Bitget): <span id="ton-rate-val">138.5 ₽</span></div>
         </header>
 
         <section class="filter-panel">
@@ -324,7 +298,7 @@
                         <label>Фильтр по цене</label>
                         <span>до: <span id="price-limit-val">0</span> ₽</span>
                     </div>
-                    <input type="range" id="price-range" min="0" max="10000" step="1">
+                    <input type="range" id="price-range" min="0" max="20000" step="5">
                 </div>
 
                 <div class="filter-group">
@@ -347,83 +321,84 @@
     <script>
         const CONFIG = {
             FUNPAY_PROFILE: "https://funpay.com/users/13409860/",
-            MARKUP_FACTOR: 1.35, // Наценка 35%
-            TON_RATE: 138.5      // Курс с Bitget
+            MIN_PRICE: 600,      // Минимальная цена за любой подарок в рублях
+            MARKUP_FACTOR: 1.35,  // Наценка 35%
+            TON_RATE: 138.5       // Актуальный курс TON
         };
 
-        // База данных подарков, строго по твоим скриншотам
+        // База данных подарков с подготовленными путями под изображения
         const LOCAL_DATA = [
-            { id: "g1", name: "Instant Ramen", tonPrice: 1.67, type: "GIFT" },
-            { id: "g2", name: "Snake Box", tonPrice: 1.67, type: "GIFT" },
-            { id: "g3", name: "Xmas Stocking", tonPrice: 1.67, type: "GIFT" },
-            { id: "g4", name: "Lunar Snake", tonPrice: 1.68, type: "GIFT" },
-            { id: "g5", name: "Candy Cane", tonPrice: 1.73, type: "GIFT" },
-            { id: "g6", name: "Whip Cupcake", tonPrice: 1.74, type: "GIFT" },
-            { id: "g7", name: "Vice Cream", tonPrice: 1.78, type: "GIFT" },
-            { id: "g8", name: "Chill Flame", tonPrice: 1.83, type: "GIFT" },
-            { id: "g9", name: "Hypno Lollipop", tonPrice: 1.84, type: "GIFT" },
-            { id: "g10", name: "Holiday Drink", tonPrice: 1.88, type: "GIFT" },
-            { id: "g11", name: "Ice Cream", tonPrice: 1.88, type: "GIFT" },
-            { id: "g12", name: "Big Year", tonPrice: 1.91, type: "GIFT" },
-            { id: "g13", name: "Star Notepad", tonPrice: 1.95, type: "GIFT" },
-            { id: "g14", name: "Jester Hat", tonPrice: 1.98, type: "GIFT" },
-            { id: "g15", name: "Pet Snake", tonPrice: 1.99, type: "GIFT" },
-            { id: "g16", name: "Easter Egg", tonPrice: 2.00, type: "GIFT" },
-            { id: "g17", name: "Party Sparkler", tonPrice: 2.00, type: "GIFT" },
-            { id: "g18", name: "Fresh Socks", tonPrice: 2.01, type: "GIFT" },
-            { id: "g19", name: "Tama Gadget", tonPrice: 2.08, type: "GIFT" },
-            { id: "g20", name: "Winter Wreath", tonPrice: 2.09, type: "GIFT" },
-            { id: "g21", name: "Hex Pot", tonPrice: 2.11, type: "GIFT" },
-            { id: "g22", name: "Happy Brownie", tonPrice: 2.14, type: "GIFT" },
-            { id: "g23", name: "Pool Float", tonPrice: 2.16, type: "GIFT" },
-            { id: "g24", name: "Ginger Cookie", tonPrice: 2.29, type: "GIFT" },
-            { id: "g25", name: "Stellar Rocket", tonPrice: 2.29, type: "GIFT" },
-            { id: "g26", name: "B-Day Candle", tonPrice: 2.43, type: "GIFT" },
-            { id: "g27", name: "Santa Hat", tonPrice: 2.44, type: "GIFT" },
-            { id: "g28", name: "Lol Pop", tonPrice: 2.46, type: "GIFT" },
-            { id: "g29", name: "Spiced Wine", tonPrice: 2.49, type: "GIFT" },
-            { id: "g30", name: "Mood Pack", tonPrice: 2.54, type: "GIFT" },
-            { id: "g31", name: "Clover Pin", tonPrice: 2.58, type: "GIFT" },
-            { id: "g32", name: "Pretty Posy", tonPrice: 2.62, type: "GIFT" },
-            { id: "g33", name: "Mousse Cake", tonPrice: 2.65, type: "GIFT" },
-            { id: "g34", name: "Restless Jar", tonPrice: 2.65, type: "GIFT" },
-            { id: "g35", name: "Bow Tie", tonPrice: 2.70, type: "GIFT" },
-            { id: "g36", name: "Input Key", tonPrice: 2.77, type: "GIFT" },
-            { id: "g37", name: "Cookie Heart", tonPrice: 2.78, type: "GIFT" },
-            { id: "g38", name: "Jack-in-the-Box", tonPrice: 2.78, type: "GIFT" },
-            { id: "g39", name: "Timeless Book", tonPrice: 2.78, type: "GIFT" },
-            { id: "g40", name: "Victory Medal", tonPrice: 2.79, type: "GIFT" },
-            { id: "g41", name: "Homemade Cake", tonPrice: 2.84, type: "GIFT" },
-            { id: "g42", name: "Money Pot", tonPrice: 2.85, type: "GIFT" },
-            { id: "g43", name: "Light Sword", tonPrice: 2.96, type: "GIFT" },
-            { id: "g44", name: "Snow Mittens", tonPrice: 2.98, type: "GIFT" },
-            { id: "g45", name: "Snoop Dogg", tonPrice: 3.04, type: "GIFT" },
-            { id: "g46", name: "Lush Bouquet", tonPrice: 3.10, type: "GIFT" },
-            { id: "g47", name: "Moon Pendant", tonPrice: 3.16, type: "GIFT" },
-            { id: "g48", name: "Snow Globe", tonPrice: 3.25, type: "GIFT" },
-            { id: "g49", name: "Spring Basket", tonPrice: 3.35, type: "GIFT" },
-            { id: "g50", name: "Swag Bag", tonPrice: 3.35, type: "GIFT" },
-            { id: "g51", name: "Faith Amulet", tonPrice: 3.36, type: "GIFT" },
-            { id: "g52", name: "Witch Hat", tonPrice: 3.48, type: "GIFT" },
-            { id: "g53", name: "Eternal Candle", tonPrice: 3.49, type: "GIFT" },
-            { id: "g54", name: "Spy Agaric", tonPrice: 3.49, type: "GIFT" },
-            { id: "g55", name: "Desk Calendar", tonPrice: 3.70, type: "GIFT" },
-            { id: "g56", name: "Evil Eye", tonPrice: 4.08, type: "GIFT" },
-            { id: "g57", name: "Bunny Muffin", tonPrice: 4.49, type: "GIFT" },
-            { id: "g58", name: "Jolly Chimp", tonPrice: 4.61, type: "GIFT" },
-            { id: "g59", name: "Joyful Bundle", tonPrice: 4.69, type: "GIFT" },
-            { id: "g60", name: "Jelly Bunny", tonPrice: 5.00, type: "GIFT" },
-            { id: "g61", name: "Jingle Bells", tonPrice: 5.48, type: "GIFT" },
-            { id: "g62", name: "Hanging Star", tonPrice: 5.88, type: "GIFT" },
-            { id: "g63", name: "Sleigh Bell", tonPrice: 6.07, type: "GIFT" },
-            { id: "g64", name: "Berry Box", tonPrice: 6.40, type: "GIFT" },
-            { id: "g65", name: "Love Candle", tonPrice: 6.50, type: "GIFT" },
-            { id: "g66", name: "Valentine Box", tonPrice: 6.55, type: "GIFT" },
-            { id: "g67", name: "Sakura Flower", tonPrice: 7.36, type: "GIFT" },
-            { id: "g68", name: "Flying Broom", tonPrice: 7.59, type: "GIFT" },
-            { id: "g69", name: "Crystal Ball", tonPrice: 7.61, type: "GIFT" },
-            { id: "g70", name: "Top Hat", tonPrice: 7.88, type: "GIFT" },
-            { id: "g71", name: "Record Player", tonPrice: 7.94, type: "GIFT" }
+            { id: "instant_ramen", name: "Instant Ramen", tonPrice: 1.67 },
+            { id: "snake_box", name: "Snake Box", tonPrice: 1.67 },
+            { id: "xmas_stocking", name: "Xmas Stocking", tonPrice: 1.67 },
+            { id: "lunar_snake", name: "Lunar Snake", tonPrice: 1.68 },
+            { id: "candy_cane", name: "Candy Cane", tonPrice: 1.73 },
+            { id: "whip_cupcake", name: "Whip Cupcake", tonPrice: 1.74 },
+            { id: "vice_cream", name: "Vice Cream", tonPrice: 1.78 },
+            { id: "chill_flame", name: "Chill Flame", tonPrice: 1.83 },
+            { id: "hypno_lollipop", name: "Hypno Lollipop", tonPrice: 1.84 },
+            { id: "holiday_drink", name: "Holiday Drink", tonPrice: 1.88 },
+            { id: "ice_cream", name: "Ice Cream", tonPrice: 1.88 },
+            { id: "big_year", name: "Big Year", tonPrice: 1.91 },
+            { id: "star_notepad", name: "Star Notepad", tonPrice: 1.95 },
+            { id: "jester_hat", name: "Jester Hat", tonPrice: 1.98 },
+            { id: "pet_snake", name: "Pet Snake", tonPrice: 1.99 },
+            { id: "easter_egg", name: "Easter Egg", tonPrice: 2.00 },
+            { id: "party_sparkler", name: "Party Sparkler", tonPrice: 2.00 },
+            { id: "fresh_socks", name: "Fresh Socks", tonPrice: 2.01 },
+            { id: "tama_gadget", name: "Tama Gadget", tonPrice: 2.08 },
+            { id: "winter_wreath", name: "Winter Wreath", tonPrice: 2.09 },
+            { id: "hex_pot", name: "Hex Pot", tonPrice: 2.11 },
+            { id: "happy_brownie", name: "Happy Brownie", tonPrice: 2.14 },
+            { id: "pool_float", name: "Pool Float", tonPrice: 2.16 },
+            { id: "ginger_cookie", name: "Ginger Cookie", tonPrice: 2.29 },
+            { id: "stellar_rocket", name: "Stellar Rocket", tonPrice: 2.29 },
+            { id: "b_day_candle", name: "B-Day Candle", tonPrice: 2.43 },
+            { id: "santa_hat", name: "Santa Hat", tonPrice: 2.44 },
+            { id: "lol_pop", name: "Lol Pop", tonPrice: 2.46 },
+            { id: "spiced_wine", name: "Spiced Wine", tonPrice: 2.49 },
+            { id: "mood_pack", name: "Mood Pack", tonPrice: 2.54 },
+            { id: "clover_pin", name: "Clover Pin", tonPrice: 2.58 },
+            { id: "pretty_posy", name: "Pretty Posy", tonPrice: 2.62 },
+            { id: "mousse_cake", name: "Mousse Cake", tonPrice: 2.65 },
+            { id: "restless_jar", name: "Restless Jar", tonPrice: 2.65 },
+            { id: "bow_tie", name: "Bow Tie", tonPrice: 2.70 },
+            { id: "input_key", name: "Input Key", tonPrice: 2.77 },
+            { id: "cookie_heart", name: "Cookie Heart", tonPrice: 2.78 },
+            { id: "jack_in_the_box", name: "Jack-in-the-Box", tonPrice: 2.78 },
+            { id: "timeless_book", name: "Timeless Book", tonPrice: 2.78 },
+            { id: "victory_medal", name: "Victory Medal", tonPrice: 2.79 },
+            { id: "homemade_cake", name: "Homemade Cake", tonPrice: 2.84 },
+            { id: "money_pot", name: "Money Pot", tonPrice: 2.85 },
+            { id: "light_sword", name: "Light Sword", tonPrice: 2.96 },
+            { id: "snow_mittens", name: "Snow Mittens", tonPrice: 2.98 },
+            { id: "snoop_dogg", name: "Snoop Dogg", tonPrice: 3.04 },
+            { id: "lush_bouquet", name: "Lush Bouquet", tonPrice: 3.10 },
+            { id: "moon_pendant", name: "Moon Pendant", tonPrice: 3.16 },
+            { id: "snow_globe", name: "Snow Globe", tonPrice: 3.25 },
+            { id: "spring_basket", name: "Spring Basket", tonPrice: 3.35 },
+            { id: "swag_bag", name: "Swag Bag", tonPrice: 3.35 },
+            { id: "faith_amulet", name: "Faith Amulet", tonPrice: 3.36 },
+            { id: "witch_hat", name: "Witch Hat", tonPrice: 3.48 },
+            { id: "eternal_candle", name: "Eternal Candle", tonPrice: 3.49 },
+            { id: "spy_agaric", name: "Spy Agaric", tonPrice: 3.49 },
+            { id: "desk_calendar", name: "Desk Calendar", tonPrice: 3.70 },
+            { id: "evil_eye", name: "Evil Eye", tonPrice: 4.08 },
+            { id: "bunny_muffin", name: "Bunny Muffin", tonPrice: 4.49 },
+            { id: "jolly_chimp", name: "Jolly Chimp", tonPrice: 4.61 },
+            { id: "joyful_bundle", name: "Joyful Bundle", tonPrice: 4.69 },
+            { id: "jelly_bunny", name: "Jelly Bunny", tonPrice: 5.00 },
+            { id: "jingle_bells", name: "Jingle Bells", tonPrice: 5.48 },
+            { id: "hanging_star", name: "Hanging Star", tonPrice: 5.88 },
+            { id: "sleigh_bell", name: "Sleigh Bell", tonPrice: 6.07 },
+            { id: "berry_box", name: "Berry Box", tonPrice: 6.40 },
+            { id: "love_candle", name: "Love Candle", tonPrice: 6.50 },
+            { id: "valentine_box", name: "Valentine Box", tonPrice: 6.55 },
+            { id: "sakura_flower", name: "Sakura Flower", tonPrice: 7.36 },
+            { id: "flying_broom", name: "Flying Broom", tonPrice: 7.59 },
+            { id: "crystal_ball", name: "Crystal Ball", tonPrice: 7.61 },
+            { id: "top_hat", name: "Top Hat", tonPrice: 7.88 },
+            { id: "record_player", name: "Record Player", tonPrice: 7.94 }
         ];
 
         let APP_STATE = {
@@ -440,11 +415,12 @@
         const domSort = document.getElementById('sort-select');
         const domReset = document.getElementById('btn-reset-all');
 
-        // Шаблон дефолтной иконки подарка (SVG), чтобы избежать битых картинок с вопросительным знаком
-        const GIFT_SVG = `
-            <svg viewBox="0 0 24 24">
-                <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35-.54-.81-1.45-1.35-2.5-1.35-1.66 0-3 1.34-3 3 0 .35.07.69.18 1H5c-1.1 0-2 .9-2 2v3c0 .55.45 1 1 1h1v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V11h1c.55 0 1-.45 1-1V8c0-1.1-.9-2-2-2zM15 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-6 1c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1zM5 8h14v2H5V8zm12 12H7V11h10v9z"/>
-            </svg>`;
+        // Функция расчёта рублёвой стоимости по твоей новой формуле
+        function calculateFinalRubPrice(tonPrice) {
+            const calculated = Math.ceil((tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+            // Если расчётная цена меньше 600 рублей, жёстко приравниваем её к 600
+            return calculated < CONFIG.MIN_PRICE ? CONFIG.MIN_PRICE : calculated;
+        }
 
         function initApp() {
             calibratePriceSlider();
@@ -458,9 +434,7 @@
         }
 
         function calibratePriceSlider() {
-            const calculatedPrices = APP_STATE.rawItems.map(item => 
-                Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR)
-            );
+            const calculatedPrices = APP_STATE.rawItems.map(item => calculateFinalRubPrice(item.tonPrice));
 
             APP_STATE.minCalculatedPrice = Math.min(...calculatedPrices);
             APP_STATE.maxCalculatedPrice = Math.max(...calculatedPrices);
@@ -480,9 +454,8 @@
             const chosenMaxPrice = parseInt(domPriceRange.value);
             const sortOrder = domSort.value;
 
-            // 1. Фильтрация по поиску и максимальной цене
             let filteredDataSet = APP_STATE.rawItems.filter(item => {
-                const finalRubPrice = Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+                const finalRubPrice = calculateFinalRubPrice(item.tonPrice);
                 
                 const matchQuery = !query || item.name.toLowerCase().includes(query);
                 const matchPrice = finalRubPrice <= chosenMaxPrice;
@@ -490,10 +463,9 @@
                 return matchQuery && matchPrice;
             });
 
-            // 2. Сортировка цены (Дешевле / Дороже)
             filteredDataSet.sort((a, b) => {
-                const priceA = Math.ceil((a.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
-                const priceB = Math.ceil((b.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+                const priceA = calculateFinalRubPrice(a.tonPrice);
+                const priceB = calculateFinalRubPrice(b.tonPrice);
                 
                 return sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
             });
@@ -508,28 +480,29 @@
             if (dataset.length === 0) {
                 domCatalog.innerHTML = `
                     <div class="state-container">
-                        Подарков с такими критериями цены или названия не найдено.
+                        Подарков по заданным критериям не найдено.
                     </div>`;
                 return;
             }
 
             dataset.forEach(item => {
-                const finalRubPrice = Math.ceil((item.tonPrice * CONFIG.TON_RATE) * CONFIG.MARKUP_FACTOR);
+                const finalRubPrice = calculateFinalRubPrice(item.tonPrice);
+                
+                // Стабильный обход CORS для картинок через CDN гитхаба
+                const cdnImageUrl = `https://raw.githubusercontent.com/portals-to/assets/main/items/${item.id}/image.png`;
 
                 const cardNode = document.createElement('div');
                 cardNode.className = 'card';
                 
-                // Используем SVG шаблон вместо заглушек, чтобы убрать знаки вопроса
                 cardNode.innerHTML = `
                     <div class="img-container">
-                        ${GIFT_SVG}
+                        <img src="${cdnImageUrl}" alt="${item.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300&q=80';" loading="lazy">
                     </div>
                     <div class="card-content">
-                        <div class="type-badge">${item.type}</div>
+                        <div class="type-badge">GIFT</div>
                         <div class="item-title">${item.name}</div>
                         <div class="price-row">
                             <div class="price-rub">${finalRubPrice.toLocaleString('ru-RU')} ₽</div>
-                            <div class="price-ton">База: ${item.tonPrice} TON</div>
                         </div>
                         <a href="${CONFIG.FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
                     </div>
