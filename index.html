@@ -12,10 +12,11 @@
             --text-muted: #94a3b8;
             --accent-color: #38bdf8;
             --price-color: #4ade80;
+            --filter-bg: #334155;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -27,12 +28,12 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.3rem;
+            margin-bottom: 5px;
             background: linear-gradient(to right, #38bdf8, #818cf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -40,7 +41,62 @@
 
         header p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
+        }
+
+        /* Панель фильтров в стиле Portals */
+        .filters-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-sizing: border-box;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select {
+            background-color: var(--filter-bg);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--accent-color);
+        }
+
+        .stats {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
         .grid {
@@ -101,7 +157,7 @@
         }
 
         .name {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: bold;
             margin-bottom: 15px;
             line-height: 1.3;
@@ -113,14 +169,14 @@
         }
 
         .price {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--price-color);
         }
 
         .price::after {
             content: ' ₽';
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .ton-price {
@@ -153,7 +209,7 @@
             color: var(--text-muted);
             grid-column: 1 / -1;
             text-align: center;
-            padding: 5px;
+            padding: 40px 0;
         }
     </style>
 </head>
@@ -161,76 +217,163 @@
 
     <header>
         <h1>FunPayRa4xq Marketplace</h1>
-        <p>Уникальные подарки Telegram (до 8 TON) по лучшим ценам</p>
+        <p>Все подарки Telegram с наценкой 35% по курсу Bitget</p>
     </header>
 
+    <section class="filters-panel">
+        <div class="filter-group">
+            <label for="filter-collection">Collection</label>
+            <select id="filter-collection"><option value="all">All Collections</option></select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-model">Model</label>
+            <select id="filter-model"><option value="all">All Models</option></select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-back">Back</label>
+            <select id="filter-back"><option value="all">All Backs</option></select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-symbol">Symbol</label>
+            <select id="filter-symbol"><option value="all">All Symbols</option></select>
+        </div>
+    </section>
+
+    <div class="stats" id="stats-counter">Загрузка информации...</div>
+
     <main class="grid" id="catalog">
-        <div class="loading">Загрузка витрины...</div>
+        <div class="loading">Загрузка витрины предметов...</div>
     </main>
 
     <script>
-        // ================= НАСТРОЙКИ МАГАЗИНА ================= //
+        // Настройки
         const FUNPAY_PROFILE = "https://funpay.com/users/13409860/"; 
-        const TON_RATE = 138; // <--- Реальный курс с Bitget на сегодня
-        const MARKUP = 1.35;  // Твоя наценка 35%
-        const MAX_PRICE_TON = 8; // Скрываем всё, что дороже 8 TON
-        // ====================================================== //
+        const TON_RATE = 138; 
+        const MARKUP = 1.35;  
 
         const catalog = document.getElementById('catalog');
+        const statsCounter = document.getElementById('stats-counter');
+        
+        // Селекты фильтров
+        const selectCollection = document.getElementById('filter-collection');
+        const selectModel = document.getElementById('filter-model');
+        const selectBack = document.getElementById('filter-back');
+        const selectSymbol = document.getElementById('filter-symbol');
 
+        let allItems = []; // Здесь будут храниться все распарсенные предметы
+
+        // Функция загрузки данных
         fetch('market_data.json')
             .then(response => {
-                if (!response.ok) throw new Error('Ошибка сети при загрузке JSON');
+                if (!response.ok) throw new Error('Ошибка при загрузке JSON');
                 return response.json();
             })
             .then(data => {
-                catalog.innerHTML = '';
-
                 if (!data.results || data.results.length === 0) {
-                    catalog.innerHTML = '<div class="loading">В данный момент нет доступных товаров.</div>';
+                    catalog.innerHTML = '<div class="loading">Нет доступных предметов в market_data.json</div>';
                     return;
                 }
 
-                let addedItemsCount = 0;
+                allItems = data.results;
+                
+                // Генерируем выпадающие списки на основе свойств из JSON
+                populateFilters(allItems);
+                
+                // Первичный рендер всех подарков
+                renderCatalog(allItems);
 
-                data.results.forEach(item => {
-                    const originalPriceTON = parseFloat(item.price);
-                    
-                    if (originalPriceTON > MAX_PRICE_TON) {
-                        return; 
-                    }
-
-                    addedItemsCount++;
-                    // Математика: TON * 138 * 1.35
-                    const finalPriceRUB = Math.round(originalPriceTON * TON_RATE * MARKUP);
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="img-container">
-                            <img src="${item.photo_url}" alt="${item.name}" loading="lazy">
-                        </div>
-                        <div class="info">
-                            <div class="number">#${item.external_collection_number || 'NFT'}</div>
-                            <div class="name">${item.name}</div>
-                            <div class="price-container">
-                                <div class="price">${finalPriceRUB}</div>
-                                <div class="ton-price">Оригинал: ${originalPriceTON} TON</div>
-                            </div>
-                            <a href="${FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
-                        </div>
-                    `;
-                    catalog.appendChild(card);
+                // Вешаем события изменения на фильтры
+                [selectCollection, selectModel, selectBack, selectSymbol].forEach(select => {
+                    select.addEventListener('change', filterProducts);
                 });
-
-                if (addedItemsCount === 0) {
-                    catalog.innerHTML = '<div class="loading">Все найденные подарки дороже 8 TON.</div>';
-                }
             })
             .catch(err => {
                 console.error(err);
                 catalog.innerHTML = '<div class="error">Не удалось загрузить витрину. Проверьте market_data.json</div>';
             });
+
+        // Функция автоматического заполнения фильтров
+        function populateFilters(items) {
+            const collections = new Set();
+            const models = new Set();
+            const backs = new Set();
+            const symbols = new Set();
+
+            items.forEach(item => {
+                if (item.collection) collections.add(item.collection);
+                if (item.model) models.add(item.model);
+                if (item.back) backs.add(item.back);
+                if (item.symbol) symbols.add(item.symbol);
+            });
+
+            // Заполняем селекты отсортированными опциями
+            appendOptions(selectCollection, collections);
+            appendOptions(selectModel, models);
+            appendOptions(selectBack, backs);
+            appendOptions(selectSymbol, symbols);
+        }
+
+        function appendOptions(selectElement, setValues) {
+            Array.from(setValues).sort().forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                selectElement.appendChild(opt);
+            });
+        }
+
+        // Функция отрисовки карточек
+        function renderCatalog(items) {
+            catalog.innerHTML = '';
+            statsCounter.textContent = `Найдено предметов: ${items.length}`;
+
+            if (items.length === 0) {
+                catalog.innerHTML = '<div class="loading">Нет предметов, соответствующих выбранным фильтрам.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const originalPriceTON = parseFloat(item.price);
+                const finalPriceRUB = Math.round(originalPriceTON * TON_RATE * MARKUP);
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${item.photo_url}" alt="${item.name}" loading="lazy">
+                    </div>
+                    <div class="info">
+                        <div class="number">#${item.external_collection_number || 'NFT'}</div>
+                        <div class="name">${item.name}</div>
+                        <div class="price-container">
+                            <div class="price">${finalPriceRUB}</div>
+                            <div class="ton-price">Оригинал: ${originalPriceTON} TON</div>
+                        </div>
+                        <a href="${FUNPAY_PROFILE}" target="_blank" class="btn-buy">Купить на FunPay</a>
+                    </div>
+                `;
+                catalog.appendChild(card);
+            });
+        }
+
+        // Логика фильтрации
+        function filterProducts() {
+            const chosenCollection = selectCollection.value;
+            const chosenModel = selectModel.value;
+            const chosenBack = selectBack.value;
+            const chosenSymbol = selectSymbol.value;
+
+            const filtered = allItems.filter(item => {
+                const matchCollection = (chosenCollection === 'all' || item.collection === chosenCollection);
+                const matchModel = (chosenModel === 'all' || item.model === chosenModel);
+                const matchBack = (chosenBack === 'all' || item.back === chosenBack);
+                const matchSymbol = (chosenSymbol === 'all' || item.symbol === chosenSymbol);
+
+                return matchCollection && matchModel && matchBack && matchSymbol;
+            });
+
+            renderCatalog(filtered);
+        }
     </script>
 
 </body>
