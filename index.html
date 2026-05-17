@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FunPayRa4xq Shop</title>
+</head>
+<body>
+    <h1>Витрина подарков FunPayRa4xq</h1>
+    <div id="market-data">Загрузка данных...</div>
+
+    <script>
+        // Пробуем прочитать созданный скриптом JSON файл
+        fetch('market_data.json')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('market-data').innerText = "Данные маркета успешно загружены! Найдено предметов: " + (data.nfts ? data.nfts.length : 0);
+            })
+            .catch(err => {
+                document.getElementById('market-data').innerText = "Ошибка загрузки JSON.";
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
