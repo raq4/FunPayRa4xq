@@ -220,9 +220,9 @@ const CFG = {
     MAX_TON:  8,
     TON_RATE: 138.5,
     API_URLS: [
-        'https://portals.tg/api/search?sort=price_asc&limit=500',
-        'https://api.allorigins.win/raw?url=https://portals.tg/api/search?sort=price_asc&limit=500',
-        'https://corsproxy.io/?https://portals.tg/api/search?sort=price_asc&limit=500'
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://portals.tg/api/search?sort=price_asc&limit=1000'),
+        'https://corsproxy.io/?' + encodeURIComponent('https://portals.tg/api/search?sort=price_asc&limit=1000'),
+        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://portals.tg/api/search?sort=price_asc&limit=1000')
     ]
 };
 
@@ -473,58 +473,129 @@ function normalizePortals(raw) {
 
 async function fetchPortals() {
     setLoading(true);
-    el.srcBadge.textContent = '⏳ Загрузка…';
+    el.srcBadge.textContent = '⏳ Загрузка с Portals…';
     el.srcBadge.className = 'badge';
 
-    for (const url of CFG.API_URLS) {
+    // Пробуем загрузить с разных прокси
+    for (let i = 0; i < CFG.API_URLS.length; i++) {
+        const url = CFG.API_URLS[i];
         try {
-            console.log('Пробую загрузить с:', url);
+            console.log(`Попытка ${i + 1}/${CFG.API_URLS.length}:`, url);
+            
             const r = await fetch(url, { 
-                signal: AbortSignal.timeout(10000),
-                headers: { 'Accept': 'application/json' }
+                signal: AbortSignal.timeout(15000),
+                headers: { 
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
             });
             
             if (!r.ok) {
-                console.log('Ответ не OK:', r.status);
+                console.log('HTTP ошибка:', r.status, r.statusText);
                 continue;
             }
             
-            const data = await r.json();
-            console.log('Получены данные:', data);
+            const text = await r.text();
+            console.log('Получен ответ, размер:', text.length, 'символов');
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.log('Ошибка парсинга JSON:', e.message);
+                continue;
+            }
+            
+            console.log('Структура данных:', Object.keys(data));
             
             const raw = Array.isArray(data) 
                 ? data 
-                : (data.items || data.gifts || data.results || data.data || []);
+                : (data.items || data.gifts || data.results || data.data || data.nfts || []);
             
             if (!raw.length) {
-                console.log('Пустой массив данных');
+                console.log('Пустой массив, пробуем следующий URL');
                 continue;
             }
 
-            console.log('Найдено записей:', raw.length);
+            console.log('✅ Найдено записей:', raw.length);
             S.items = normalizePortals(raw);
             S.isLive = true;
             
-            el.srcBadge.textContent = `✅ Portals · ${S.items.length} лотов`;
+            el.srcBadge.textContent = `✅ Portals · ${S.items.length} подарков`;
             el.srcBadge.className = 'badge live';
             setLoading(false);
             
-            console.log('Успешно загружено:', S.items.length, 'подарков');
-            return;
+            console.log('Успех! Загружено:', S.items.length, 'подарков');
+            return true;
             
         } catch (err) {
-            console.error('Ошибка загрузки:', err);
+            console.error(`Ошибка при попытке ${i + 1}:`, err.message);
         }
     }
 
-    // Если все попытки провалились
-    S.items = [];
+    // Если все попытки провалились - загружаем локальные данные
+    console.log('❌ Все попытки загрузки провалились, использую локальные данные');
+    loadLocalData();
+    return false;
+}
+
+function loadLocalData() {
+    const LOCAL = [
+        {name:'Delicious Cake',    model:'Three-Tier',     backdrop:'Festive',      symbol:'',           ton:0.50, tg_id:'100001', collection_name:'Delicious Cake'},
+        {name:'Green Star',        model:'Neon',           backdrop:'Dark',         symbol:'',           ton:0.77, tg_id:'100002', collection_name:'Green Star'},
+        {name:'Red Star',          model:'Neon',           backdrop:'Dark',         symbol:'',           ton:0.88, tg_id:'100003', collection_name:'Red Star'},
+        {name:'Blue Star',         model:'Neon',           backdrop:'Dark',         symbol:'',           ton:0.99, tg_id:'100004', collection_name:'Blue Star'},
+        {name:'Instant Ramen',     model:'Ratatouille',    backdrop:'Pure Gold',    symbol:'',           ton:1.67, tg_id:'215984', collection_name:'Instant Ramen'},
+        {name:'Snake Box',         model:'Red Dash',       backdrop:'Amber',        symbol:'',           ton:1.67, tg_id:'173536', collection_name:'Snake Box'},
+        {name:'Xmas Stocking',     model:'Lavender',       backdrop:'Burnt Sienna', symbol:'',           ton:1.67, tg_id:'86160',  collection_name:'Xmas Stocking'},
+        {name:'Lunar Snake',       model:'Classic',        backdrop:'Crimson',      symbol:'',           ton:1.68, tg_id:'10943',  collection_name:'Lunar Snake'},
+        {name:'Candy Cane',        model:'Sweet Mint',     backdrop:'Emerald',      symbol:'',           ton:1.73, tg_id:'44123',  collection_name:'Candy Cane'},
+        {name:'Whip Cupcake',      model:'Creamy',         backdrop:'Violet',       symbol:'',           ton:1.74, tg_id:'98542',  collection_name:'Whip Cupcake'},
+        {name:'Vice Cream',        model:'Soft Serve',     backdrop:'Mint',         symbol:'',           ton:1.78, tg_id:'12351',  collection_name:'Vice Cream'},
+        {name:'Chill Flame',       model:'Neon',           backdrop:'Darkness',     symbol:'',           ton:1.83, tg_id:'65123',  collection_name:'Chill Flame'},
+        {name:'Holiday Drink',     model:'Spiced',         backdrop:'Winter',       symbol:'',           ton:1.88, tg_id:'32154',  collection_name:'Holiday Drink'},
+        {name:'Ice Cream',         model:'Vanilla',        backdrop:'Berry',        symbol:'',           ton:1.88, tg_id:'15432',  collection_name:'Ice Cream'},
+        {name:'Big Year',          model:'2025',           backdrop:'Confetti',     symbol:'',           ton:1.91, tg_id:'88412',  collection_name:'Big Year'},
+        {name:'Star Notepad',      model:'Leather',        backdrop:'Cosmic',       symbol:'',           ton:1.95, tg_id:'23154',  collection_name:'Star Notepad'},
+        {name:'Jester Hat',        model:'Circus',         backdrop:'Cyan',         symbol:'',           ton:1.98, tg_id:'140112', collection_name:'Jester Hat'},
+        {name:'Pet Snake',         model:'Snake Dance',    backdrop:'Indigo',       symbol:'',           ton:1.99, tg_id:'184511', collection_name:'Pet Snake'},
+        {name:'Easter Egg',        model:'Painted',        backdrop:'Spring',       symbol:'',           ton:2.00, tg_id:'54213',  collection_name:'Easter Egg'},
+        {name:'Fresh Socks',       model:'Striped',        backdrop:'Warmth',       symbol:'',           ton:2.01, tg_id:'43215',  collection_name:'Fresh Socks'},
+        {name:'Winter Wreath',     model:'Pine',           backdrop:'Forest',       symbol:'',           ton:2.09, tg_id:'19432',  collection_name:'Winter Wreath'},
+        {name:'Happy Brownie',     model:'Choco',          backdrop:'Sweet',        symbol:'',           ton:2.14, tg_id:'76541',  collection_name:'Happy Brownie'},
+        {name:'Ginger Cookie',     model:'Man',            backdrop:'Bakery',       symbol:'',           ton:2.29, tg_id:'84321',  collection_name:'Ginger Cookie'},
+        {name:'Santa Hat',         model:'Claus',          backdrop:'Red',          symbol:'',           ton:2.44, tg_id:'43125',  collection_name:'Santa Hat'},
+        {name:'Spiced Wine',       model:'Glint',          backdrop:'Cozy',         symbol:'',           ton:2.49, tg_id:'65432',  collection_name:'Spiced Wine'},
+        {name:'Pretty Posy',       model:'Flowers',        backdrop:'Garden',       symbol:'',           ton:2.62, tg_id:'12345',  collection_name:'Pretty Posy'},
+        {name:'Bow Tie',           model:'Classic',        backdrop:'Tuxedo',       symbol:'',           ton:2.70, tg_id:'96321',  collection_name:'Bow Tie'},
+        {name:'Cookie Heart',      model:'Love',           backdrop:'Pink',         symbol:'',           ton:2.78, tg_id:'85236',  collection_name:'Cookie Heart'},
+        {name:'Victory Medal',     model:'Gold',           backdrop:'Champ',        symbol:'',           ton:2.79, tg_id:'25814',  collection_name:'Victory Medal'},
+        {name:'Snow Mittens',      model:'Fluffy',         backdrop:'Ice',          symbol:'',           ton:2.98, tg_id:'32147',  collection_name:'Snow Mittens'},
+        {name:'Snoop Dogg',        model:'Legend',         backdrop:'WestCoast',    symbol:'',           ton:3.04, tg_id:'42153',  collection_name:'Snoop Dogg'},
+        {name:'Lush Bouquet',      model:'Luxury',         backdrop:'Rose',         symbol:'',           ton:3.10, tg_id:'75312',  collection_name:'Lush Bouquet'},
+        {name:'Snow Globe',        model:'Magic',          backdrop:'Freeze',       symbol:'',           ton:3.25, tg_id:'85213',  collection_name:'Snow Globe'},
+        {name:'Spring Basket',     model:'Easter',         backdrop:'Green',        symbol:'',           ton:3.35, tg_id:'74123',  collection_name:'Spring Basket'},
+        {name:'Witch Hat',         model:'Sorcerer',       backdrop:'Magic',        symbol:'',           ton:3.48, tg_id:'34301',  collection_name:'Witch Hat'},
+        {name:'Evil Eye',          model:'Amulet',         backdrop:'Protect',      symbol:'',           ton:4.08, tg_id:'96314',  collection_name:'Evil Eye'},
+        {name:'Jolly Chimp',       model:'Toy',            backdrop:'Vintage',      symbol:'',           ton:4.61, tg_id:'14852',  collection_name:'Jolly Chimp'},
+        {name:'Jelly Bunny',       model:'Sweet',          backdrop:'Gelatin',      symbol:'',           ton:5.00, tg_id:'15948',  collection_name:'Jelly Bunny'},
+        {name:'Jingle Bells',      model:'Brass',          backdrop:'Xmas',         symbol:'',           ton:5.48, tg_id:'74159',  collection_name:'Jingle Bells'},
+        {name:'Sleigh Bell',       model:'Silver',         backdrop:'Chime',        symbol:'',           ton:6.07, tg_id:'36952',  collection_name:'Sleigh Bell'},
+        {name:'Berry Box',         model:'Fresh',          backdrop:'Fruit',        symbol:'',           ton:6.40, tg_id:'14725',  collection_name:'Berry Box'},
+        {name:'Love Candle',       model:'Heart',          backdrop:'Aroma',        symbol:'',           ton:6.50, tg_id:'85231',  collection_name:'Love Candle'},
+        {name:'Sakura Flower',     model:'Bloom',          backdrop:'Japan',        symbol:'',           ton:7.36, tg_id:'14258',  collection_name:'Sakura Flower'},
+        {name:'Flying Broom',      model:'Nimbus',         backdrop:'Witchcraft',   symbol:'',           ton:7.59, tg_id:'75369',  collection_name:'Flying Broom'},
+        {name:'Top Hat',           model:'Gentleman',      backdrop:'Charcoal',     symbol:'',           ton:7.88, tg_id:'34302',  collection_name:'Top Hat'},
+    ];
+
+    S.items = normalizePortals(LOCAL);
     S.isLive = false;
-    el.srcBadge.textContent = '❌ Ошибка загрузки';
+    
+    el.srcBadge.textContent = '📦 Локальные данные';
     el.srcBadge.className = 'badge';
     setLoading(false);
     
-    el.grid.innerHTML = '<div class="empty">Не удалось загрузить данные. Попробуйте обновить страницу.</div>';
+    console.log('Загружено локальных данных:', S.items.length);
 }
 
 /* ═══════════════  INIT  ══════════════ */
